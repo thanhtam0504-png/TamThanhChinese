@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tam Thanh Chinese - Ứng Dụng Học Tiếng Trung Toàn Diện (Standalone Single File)</title>
+  
+  <!-- 1. TAILWIND CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 2. REACT 18 & REACT-DOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- 3. BABEL STANDALONE (Hỗ trợ JSX trực tiếp trên trình duyệt) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- 4. HIỆU ỨNG CANVAS CONFETTI -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- 5. PHÔNG CHỮ QUỐC TẾ & CHỮ HÁN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            hanzi: ['"Noto Serif SC"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hanzi-text {
+      font-family: 'Noto Serif SC', serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 antialiased min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // PHÁT ÂM CHỮ HÁN TỰ NHIÊN BẰNG WEB SPEECH API
+    const speakChinese = (text, rate = 0.85) => {
+      if (!('speechSynthesis' in window)) {
+        alert('Trình duyệt của bạn không hỗ trợ Web Speech API.');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN';
+      utterance.rate = rate;
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // DỮ LIỆU TỪ VỰNG HSK 1 - 6
+    const INITIAL_VOCAB = [
+      { id: '1', word: '你好', pinyin: 'nǐ hǎo', hanViet: 'Nhĩ Hảo', meaning: 'Xin chào', level: 'HSK 1', category: 'Chào hỏi' },
+      { id: '2', word: '谢谢', pinyin: 'xièxie', hanViet: 'Tạ Tạ', meaning: 'Cảm ơn', level: 'HSK 1', category: 'Chào hỏi' },
+      { id: '3', word: '再见', pinyin: 'zàijiàn', hanViet: 'Tái Kiến', meaning: 'Tạm biệt', level: 'HSK 1', category: 'Chào hỏi' },
+      { id: '4', word: '喝茶', pinyin: 'hē chá', hanViet: 'Hát Trà', meaning: 'Uống trà', level: 'HSK 1', category: 'Ẩm thực' },
+      { id: '5', word: '中国', pinyin: 'zhōngguó', hanViet: 'Trung Quốc', meaning: 'Nước Trung Quốc', level: 'HSK 1', category: 'Địa danh' },
+      { id: '6', word: '喜欢', pinyin: 'xǐhuan', hanViet: 'Hỉ Hoan', meaning: 'Thích thú, yêu thích', level: 'HSK 2', category: 'Cảm xúc' },
+      { id: '7', word: '考试', pinyin: 'kǎoshì', hanViet: 'Khảo Thí', meaning: 'Kỳ thi, thi cử', level: 'HSK 2', category: 'Học tập' },
+      { id: '8', word: '清楚', pinyin: 'qīngchu', hanViet: 'Thanh Sở', meaning: 'Rõ ràng, minh bạch', level: 'HSK 3', category: 'Mô tả' },
+      { id: '9', word: '提高', pinyin: 'tígāo', hanViet: 'Đề Cao', meaning: 'Nâng cao, cải thiện', level: 'HSK 3', category: 'Học tập' },
+      { id: '10', word: '面试', pinyin: 'miànshì', hanViet: 'Diện Thí', meaning: 'Phỏng vấn tuyển dụng', level: 'HSK 4', category: 'Công sở' },
+      { id: '11', word: '顺利', pinyin: 'shùnlì', hanViet: 'Thuận Lợi', meaning: 'Thuận buồm xuôi gió', level: 'HSK 4', category: 'Kinh doanh' },
+      { id: '12', word: '鉴于', pinyin: 'jiànyú', hanViet: 'Giám Vu', meaning: 'Xét thấy, căn cứ vào', level: 'HSK 5', category: 'Thương mại' },
+      { id: '13', word: '破釜沉舟', pinyin: 'pò fǔ chén zhōu', hanViet: 'Phá Phủ Trầm Châu', meaning: 'Quyết tử không lùi bước (Thành ngữ)', level: 'HSK 6', category: 'Thành ngữ' },
+    ];
+
+    // DỮ LIỆU VIDEO NGẮN LUYỆN SHADOWING
+    const SHORT_VIDEOS = [
+      {
+        id: 'v1',
+        title: 'Đặt Cà Phê Bằng Tiếng Trung Chuẩn Bản Xứ',
+        creator: 'Cô Tâm Thanh',
+        hskLevel: 'HSK 2',
+        videoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80',
+        captions: [
+          { time: '0:01', hanzi: '你好，我要一杯拿铁，少糖。', pinyin: 'Nǐ hǎo, wǒ yào yī bēi nátiě, shǎo táng.', viet: 'Xin chào, tôi muốn một ly Latte, ít đường.' },
+          { time: '0:03', hanzi: '热的还是加冰的？', pinyin: 'Rè de háishì jiā bīng de?', viet: 'Uống nóng hay thêm đá ạ?' },
+          { time: '0:05', hanzi: '请给我大杯加冰的，谢谢！', pinyin: 'Qǐng gěi wǒ dà bēi jiā bīng de, xièxie!', viet: 'Cho tôi ly lớn có đá nhé, cảm ơn!' }
+        ]
+      },
+      {
+        id: 'v2',
+        title: 'Đàm Phán Báo Giá & Chiết Khấu Trong Công Sở',
+        creator: 'Thầy Hoàng Minh',
+        hskLevel: 'HSK 4',
+        videoUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=80',
+        captions: [
+          { time: '0:01', hanzi: '贵公司的报价比市场平均价略高。', pinyin: 'Guì gōngsī de bàojià bǐ shìchǎng píngjūnjià lüè gāo.', viet: 'Báo giá của quý công ty hơi cao hơn mặt bằng chung.' },
+          { time: '0:04', hanzi: '如果首批订购五千件，能享受多少折扣？', pinyin: 'Rúguǒ shǒupī dìnggòu wǔqiān jiàn, néng xiǎngshòu duōshao zhékòu?', viet: 'Nếu đợt đầu đặt 5000 chiếc thì được chiết khấu bao nhiêu?' }
+        ]
+      }
+    ];
+
+    function App() {
+      const [currentTab, setCurrentTab] = useState('flashcards');
+      const [darkMode, setDarkMode] = useState(false);
+      const [vocabList, setVocabList] = useState(INITIAL_VOCAB);
+      const [selectedLevel, setSelectedLevel] = useState('ALL');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [cardIndex, setCardIndex] = useState(0);
+      const [isFlipped, setIsFlipped] = useState(false);
+      const [bookmarkedWords, setBookmarkedWords] = useState([]);
+      const [streak, setStreak] = useState(7);
+      const [studyMinutes, setStudyMinutes] = useState(45);
+
+      const filteredVocab = useMemo(() => {
+        return vocabList.filter(item => {
+          const matchLevel = selectedLevel === 'ALL' || item.level === selectedLevel;
+          const matchSearch = searchQuery === '' || 
+            item.word.includes(searchQuery) || 
+            item.pinyin.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            item.meaning.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchLevel && matchSearch;
+        });
+      }, [vocabList, selectedLevel, searchQuery]);
+
+      const currentCard = filteredVocab[cardIndex] || filteredVocab[0] || INITIAL_VOCAB[0];
+
+      useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [darkMode]);
+
+      const handleNextCard = () => {
+        setIsFlipped(false);
+        setCardIndex((prev) => (prev + 1) % (filteredVocab.length || 1));
+      };
+
+      const handlePrevCard = () => {
+        setIsFlipped(false);
+        setCardIndex((prev) => (prev - 1 + filteredVocab.length) % (filteredVocab.length || 1));
+      };
+
+      const toggleBookmark = (word) => {
+        if (bookmarkedWords.includes(word)) {
+          setBookmarkedWords(bookmarkedWords.filter(w => w !== word));
+        } else {
+          setBookmarkedWords([...bookmarkedWords, word]);
+          if (window.confetti) {
+            window.confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
+          }
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+          
+          {/* HEADER */}
+          <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-700 to-rose-600 text-white font-black text-xl flex items-center justify-center shadow-md">
+                三
+              </div>
+              <div>
+                <h1 className="font-extrabold text-base sm:text-lg tracking-tight flex items-center gap-1.5">
+                  <span className="text-red-700 dark:text-red-500">Tam Thanh</span>
+                  <span>Chinese</span>
+                  <span className="text-[10px] uppercase font-black bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800">
+                    Standalone HTML
+                  </span>
+                </h1>
+                <p className="text-[11px] text-slate-500 font-medium">Học Tiếng Trung Chuẩn HSK 1-9 & Giao Tiếp Đời Thực</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold">
+                <span className="text-amber-500">🔥 {streak} ngày</span>
+                <span className="text-slate-300 dark:text-slate-600">|</span>
+                <span className="text-blue-500">⏱️ {studyMinutes} phút</span>
+              </div>
+
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"
+              >
+                {darkMode ? '☀️ Sáng' : '🌙 Tối'}
+              </button>
+            </div>
+          </header>
+
+          {/* THANH ĐIỀU HƯỚNG TAB */}
+          <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto custom-scrollbar">
+            {[
+              { id: 'flashcards', label: '📇 Flashcards & Từ Vựng' },
+              { id: 'short_videos', label: '🎬 Video Ngắn (Reels/TikTok)' },
+              { id: 'spaced_repetition', label: '🔄 Ôn Tập SM-2 (Leitner)' },
+              { id: 'assessment', label: '🎯 Đánh Giá Trình Độ' },
+              { id: 'tone_analyzer', label: '🎙️ Luyện Âm & 4 Thanh Điệu' },
+              { id: 'all_words', label: '📖 Tra Cứu Toàn Bộ Từ' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setCurrentTab(tab.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                  currentTab === tab.id
+                    ? 'bg-red-700 text-white shadow-xs'
+                    : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* NỘI DUNG CHÍNH */}
+          <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-6">
+            
+            {/* VIEW 1: FLASHCARDS */}
+            {currentTab === 'flashcards' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                  <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
+                    {['ALL', 'HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6'].map(lvl => (
+                      <button
+                        key={lvl}
+                        onClick={() => { setSelectedLevel(lvl); setCardIndex(0); }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                          selectedLevel === lvl 
+                            ? 'bg-red-700 text-white' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="Tìm theo chữ Hán, Pinyin, nghĩa..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full sm:w-64 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:border-red-600"
+                  />
+                </div>
+
+                {/* THẺ FLASHCARD 3D */}
+                <div className="max-w-xl mx-auto space-y-4">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>Thẻ {cardIndex + 1} / {filteredVocab.length || 1}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300">
+                      {currentCard.level}
+                    </span>
+                  </div>
+
+                  <div
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    className={`min-h-[320px] p-8 rounded-3xl bg-white dark:bg-slate-900 border-2 transition-all duration-300 cursor-pointer shadow-xl flex flex-col justify-between items-center text-center ${
+                      isFlipped ? 'border-emerald-500 dark:border-emerald-700 bg-emerald-50/20' : 'border-slate-200 dark:border-slate-800 hover:border-red-400'
+                    }`}
+                  >
+                    <div className="w-full flex items-center justify-between text-xs text-slate-400">
+                      <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-mono">
+                        {currentCard.category}
+                      </span>
+                      <span className="text-[11px]">
+                        {isFlipped ? 'Chạm để xem chữ Hán' : 'Chạm để lật xem nghĩa & Pinyin'}
+                      </span>
+                    </div>
+
+                    {!isFlipped ? (
+                      <div className="space-y-4 my-auto">
+                        <div className="text-7xl font-black hanzi-text text-slate-900 dark:text-slate-100 tracking-wider">
+                          {currentCard.word}
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          Hãy đọc nhẩm Pinyin và âm Hán Việt trước khi lật thẻ
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 my-auto">
+                        <div className="text-5xl font-black hanzi-text text-slate-900 dark:text-slate-100">
+                          {currentCard.word}
+                        </div>
+                        <div className="text-xl font-black text-red-600 dark:text-red-400 font-mono">
+                          {currentCard.pinyin}
+                        </div>
+                        <div className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                          Hán Việt: {currentCard.hanViet}
+                        </div>
+                        <div className="text-base font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/80 px-4 py-2 rounded-xl">
+                          {currentCard.meaning}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="w-full flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          speakChinese(currentCard.word);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 text-slate-700 dark:text-slate-300 hover:text-red-700 text-xs font-bold flex items-center gap-1.5"
+                      >
+                        🔊 Nghe phát âm
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(currentCard.word);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ${
+                          bookmarkedWords.includes(currentCard.word)
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        ⭐ {bookmarkedWords.includes(currentCard.word) ? 'Đã lưu sổ tay' : 'Lưu sổ tay'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      onClick={handlePrevCard}
+                      className="flex-1 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-2xl transition-all shadow-xs"
+                    >
+                      ← Thẻ trước
+                    </button>
+                    <button
+                      onClick={handleNextCard}
+                      className="flex-1 py-3 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-2xl transition-all shadow-md"
+                    >
+                      Thẻ tiếp theo →
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* VIEW 2: VIDEO NGẮN */}
+            {currentTab === 'short_videos' && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 text-white space-y-2">
+                  <span className="text-[10px] font-black bg-purple-500/40 text-purple-200 px-2.5 py-1 rounded-full uppercase">
+                    TikTok/Reels Chinese Shadowing
+                  </span>
+                  <h2 className="text-xl font-bold">Video Ngắn Luyện Nghe & Đọc Đuổi Câu Thoại</h2>
+                  <p className="text-xs text-purple-200">
+                    Phụ đề song ngữ kèm Pinyin hỗ trợ nghe giọng bản xứ với ngữ điệu tự nhiên.
+                  </p>
+                </div>
+
+                {SHORT_VIDEOS.map(video => (
+                  <div key={video.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950 px-2.5 py-0.5 rounded-md">
+                          {video.hskLevel}
+                        </span>
+                        <h3 className="font-bold text-base mt-1">{video.title}</h3>
+                        <p className="text-[11px] text-slate-400">Giảng viên: {video.creator}</p>
+                      </div>
+                    </div>
+
+                    <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-900 flex items-center justify-center">
+                      <img src={video.videoUrl} alt={video.title} className="w-full h-full object-cover opacity-60" />
+                      <button
+                        onClick={() => {
+                          const fullText = video.captions.map(c => c.hanzi).join(' ');
+                          speakChinese(fullText, 0.8);
+                        }}
+                        className="absolute w-14 h-14 rounded-full bg-red-600/90 text-white flex items-center justify-center text-xl shadow-lg hover:scale-110 transition-transform"
+                      >
+                        ▶
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-slate-500 uppercase">Phụ đề & Shadowing từng câu:</p>
+                      {video.captions.map((cap, cIdx) => (
+                        <div
+                          key={cIdx}
+                          onClick={() => speakChinese(cap.hanzi)}
+                          className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-red-50 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all flex items-center justify-between"
+                        >
+                          <div className="space-y-0.5">
+                            <p className="text-sm font-black text-slate-900 dark:text-slate-100">{cap.hanzi}</p>
+                            <p className="text-xs font-mono text-red-600 dark:text-red-400">{cap.pinyin}</p>
+                            <p className="text-xs text-slate-500">{cap.viet}</p>
+                          </div>
+                          <button className="text-xs font-bold text-red-600 p-2">
+                            🔊 Đọc
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* VIEW 3: ÔN TẬP SM-2 */}
+            {currentTab === 'spaced_repetition' && (
+              <div className="space-y-6">
+                <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-950 to-slate-900 text-white space-y-2">
+                  <span className="text-[10px] font-black bg-amber-500/40 text-amber-200 px-2.5 py-1 rounded-full uppercase">
+                    Leitner Box & SM-2 Algorithm
+                  </span>
+                  <h2 className="text-xl font-bold">Ôn Tập Lặp Lại Ngắt Quãng (Spaced Repetition)</h2>
+                  <p className="text-xs text-amber-200">
+                    Thuật toán ghi nhớ dài hạn giúp não bộ nhớ từ vựng vĩnh viễn theo chu kỳ 1 ngày, 3 ngày, 7 ngày, 16 ngày và 30 ngày.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+                  {[
+                    { box: 'Hộp 1', days: '1 ngày', count: 5, color: 'text-rose-500' },
+                    { box: 'Hộp 2', days: '3 ngày', count: 8, color: 'text-amber-500' },
+                    { box: 'Hộp 3', days: '7 ngày', count: 12, color: 'text-blue-500' },
+                    { box: 'Hộp 4', days: '16 ngày', count: 6, color: 'text-teal-500' },
+                    { box: 'Hộp 5', days: '30 ngày', count: 15, color: 'text-emerald-500' },
+                  ].map((b, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                      <p className="text-xs font-bold text-slate-400">{b.box} ({b.days})</p>
+                      <p className={`text-2xl font-black mt-1 ${b.color}`}>{b.count}</p>
+                      <p className="text-[10px] text-slate-500">từ vựng</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4">
+                  <h3 className="text-sm font-bold">Danh sách từ đang theo dõi trong SRS:</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {vocabList.slice(0, 8).map(w => (
+                      <div key={w.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-base">{w.word}</span>
+                          <span className="text-xs font-mono text-red-600 ml-2">[{w.pinyin}]</span>
+                          <p className="text-xs text-slate-500">{w.meaning}</p>
+                        </div>
+                        <button
+                          onClick={() => speakChinese(w.word)}
+                          className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 text-xs font-bold"
+                        >
+                          🔊 Nghe
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 4: ĐÁNH GIÁ TRÌNH ĐỘ */}
+            {currentTab === 'assessment' && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-center">
+                  <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950 text-red-600 flex items-center justify-center text-2xl mx-auto">
+                    🎯
+                  </div>
+                  <h2 className="text-xl font-bold">Kiểm Tra Chẩn Đoán Trình Độ Nhanh</h2>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Hệ thống đánh giá vốn từ vựng, ngữ pháp câu chữ 把/被, văn phong công sở và đề xuất lộ trình phù hợp từ HSK 1 đến HSK 9.
+                  </p>
+
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 text-left space-y-3">
+                    <p className="text-xs font-bold text-red-600">Câu hỏi 1: Điền từ thích hợp vào chỗ trống:</p>
+                    <p className="text-base font-bold">昨天晚上我_____了两个小时的汉语。</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['A. 学', 'B. 学习', 'C. 教', 'D. 读'].map((opt, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            if (i === 1) {
+                              alert('Chính xác! Cấu trúc bổ ngữ thời lượng: 学习了 + Khoảng thời gian');
+                              if (window.confetti) window.confetti();
+                            } else {
+                              alert('Chưa chính xác. Đáp án đúng là B. 学习');
+                            }
+                          }}
+                          className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-red-500 text-xs font-semibold text-left"
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 5: PHÂN TÍCH 4 THANH ĐIỆU */}
+            {currentTab === 'tone_analyzer' && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <span>🎙️ Phân Tích 4 Thanh Điệu Tiếng Trung</span>
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Bấm vào từng thanh điệu để nghe giọng chuẩn và luyện tập phát âm cao độ (5-5, 3-5, 2-1-4, 5-1).
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { name: 'Thanh 1 (Âm Bình 5-5)', pinyin: 'mā (妈)', desc: 'Cao và phẳng đều', sample: '妈' },
+                      { name: 'Thanh 2 (Dương Bình 3-5)', pinyin: 'má (麻)', desc: 'Kéo từ trung bình lên cao (như dấu sắc)', sample: '麻' },
+                      { name: 'Thanh 3 (Thượng Thanh 2-1-4)', pinyin: 'mǎ (马)', desc: 'Xuống thấp rồi uốn lên (như dấu hỏi)', sample: '马' },
+                      { name: 'Thanh 4 (Khứ Thanh 5-1)', pinyin: 'mà (骂)', desc: 'Dứt khoát rơi từ đỉnh xuống đáy', sample: '骂' },
+                    ].map((t, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-red-600">{t.name}</span>
+                          <button
+                            onClick={() => speakChinese(t.sample)}
+                            className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950 text-red-700 text-xs font-bold"
+                          >
+                            🔊 Nghe
+                          </button>
+                        </div>
+                        <p className="text-lg font-black text-slate-900 dark:text-slate-100">{t.pinyin}</p>
+                        <p className="text-xs text-slate-500">{t.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW 6: TOÀN BỘ TỪ VỰNG */}
+            {currentTab === 'all_words' && (
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold">Tra Cứu Toàn Bộ Từ Vựng ({vocabList.length} từ)</h2>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 font-bold">
+                        <th className="py-2.5 px-3">Chữ Hán</th>
+                        <th className="py-2.5 px-3">Pinyin</th>
+                        <th className="py-2.5 px-3">Hán Việt</th>
+                        <th className="py-2.5 px-3">Nghĩa Tiếng Việt</th>
+                        <th className="py-2.5 px-3">Cấp Độ</th>
+                        <th className="py-2.5 px-3 text-right">Phát Âm</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {vocabList.map(w => (
+                        <tr key={w.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                          <td className="py-3 px-3 text-base font-black hanzi-text">{w.word}</td>
+                          <td className="py-3 px-3 font-mono font-bold text-red-600">{w.pinyin}</td>
+                          <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{w.hanViet}</td>
+                          <td className="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200">{w.meaning}</td>
+                          <td className="py-3 px-3">
+                            <span className="px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold">
+                              {w.level}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <button
+                              onClick={() => speakChinese(w.word)}
+                              className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 rounded-lg text-slate-700 dark:text-slate-300 hover:text-red-700 font-bold"
+                            >
+                              🔊
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* FOOTER */}
+          <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500">
+            <p className="font-bold text-slate-700 dark:text-slate-300">Tam Thanh Chinese &copy; 2026 - Bản Xuất Độc Lập 1 File Duy Nhất</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Chứa đầy đủ mã nguồn HTML, CSS Tailwind, JavaScript React & Web Speech API. Mở trực tiếp trên mọi thiết bị không cần cài đặt.
+            </p>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // KHỞI CHẠY ỨNG DỤNG REACT
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
