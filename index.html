@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tam Thanh Chinese - Nền Tảng Khóa Học Tiếng Trung</title>
+  <title>Tam Thanh Chinese - Kho Từ Vựng HSK 1-9 Độc Quyền</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -49,25 +49,25 @@
       window.speechSynthesis.speak(utterance);
     };
 
-    // HỆ THỐNG TỪ VỰNG PHÂN TẦNG (SƠ CẤP MIỄN PHÍ & NÂNG CAO TRẢ PHÍ)
+    // KHO TỪ VỰNG TÍCH HỢP TRỰC TIẾP (Pinyin in đậm âm bật hơi đúng yêu cầu, kèm Hán Việt)
     const ALL_VOCAB = [
-      // HSK 1 - 3 (Miễn phí / Phễu thu hút học viên)
       { id: '1', word: '你好', pinyin: 'nǐ hǎo', hanViet: 'Nhĩ Hảo', meaning: 'Xin chào', level: 'HSK 1', isVip: false },
       { id: '2', word: '谢谢', pinyin: 'xièxie', hanViet: 'Tạ Tạ', meaning: 'Cảm ơn', level: 'HSK 1', isVip: false },
       { id: '3', word: '再见', pinyin: 'zài<b>ji</b>àn', hanViet: 'Tái Kiến', meaning: 'Tạm biệt', level: 'HSK 1', isVip: false },
-      { id: '4', word: '<b>p</b>éngyou', word_display: '朋友', pinyin: '<b>p</b>éng you', hanViet: 'Bằng Hữu', meaning: 'Bạn bè', level: 'HSK 2', isVip: false },
-      { id: '5', word: '<b>t</b>iānqì', word_display: '天气', pinyin: '<b>t</b>iān qì', hanViet: 'Thiên Khí', meaning: 'Thời tiết', level: 'HSK 2', isVip: false },
-      { id: '6', word: '<b>ch</b>īfàn', word_display: '吃饭', pinyin: '<b>ch</b>ī fàn', hanViet: 'Cật Phạn', meaning: 'Ăn cơm', level: 'HSK 2', isVip: false },
+      { id: '4', word: '朋友', word_display: '朋友', pinyin: '<b>p</b>éng you', hanViet: 'Bằng Hữu', meaning: 'Bạn bè', level: 'HSK 2', isVip: false },
+      { id: '5', word: '天气', word_display: '天气', pinyin: '<b>t</b>iān qì', hanViet: 'Thiên Khí', meaning: 'Thời tiết', level: 'HSK 2', isVip: false },
+      { id: '6', word: '吃饭', word_display: '吃饭', pinyin: '<b>ch</b>ī fàn', hanViet: 'Cật Phạn', meaning: 'Ăn cơm', level: 'HSK 2', isVip: false },
       { id: '7', word: '问题', pinyin: 'wèn<b>t</b>í', hanViet: 'Vấn Đề', meaning: 'Vấn đề, câu hỏi', level: 'HSK 3', isVip: false },
-
-      // HSK 4 - 9 (Khóa nội dung độc quyền dành cho học viên mua khóa học)
       { id: '8', word: '面试', pinyin: 'miàn<b>sh</b>ì', hanViet: 'Diện Thí', meaning: 'Phỏng vấn tuyển dụng', level: 'HSK 4', isVip: true },
       { id: '9', word: '顺利', pinyin: '<b>sh</b>ùn<b>l</b>ì', hanViet: 'Thuận Lợi', meaning: 'Thuận buồm xuôi gió', level: 'HSK 4', isVip: true },
-      { id: '10', word: '<b>k</b>ǎolǜ', word_display: '考虑', pinyin: '<b>k</b>ǎolǜ', hanViet: 'Khảo Lự', meaning: 'Cân nhắc, suy nghĩ', level: 'HSK 5', isVip: true },
-      { id: '11', word: '<b>p</b>īpíng', word_display: '批评', pinyin: '<b>p</b>īpíng', hanViet: 'Phê Bình', meaning: 'Phê bình, chỉ trích', level: 'HSK 5', isVip: true },
-      { id: '12', word: '<b>q</b>īdài', word_display: '期待', pinyin: '<b>q</b>īdài', hanViet: 'Kỳ Đãi', meaning: 'Kỳ vọng, mong đợi', level: 'HSK 5', isVip: true },
-      { id: '13', word: '<b>c</b>ǐwài', word_display: '此外', pinyin: '<b>c</b>ǐwài', hanViet: 'Thử Ngoại', meaning: 'Ngoài ra, bên cạnh đó', level: 'HSK 5', isVip: true },
-      { id: '14', word: '破釜沉舟', pinyin: '<b>p</b>ò fǔ <b>ch</b>én zhōu', hanViet: 'Phá Phủ Trầm Châu', meaning: 'Quyết tử không lùi bước (Thành ngữ cao cấp)', level: 'HSK 6', isVip: true },
+      { id: '10', word: '考虑', word_display: '考虑', pinyin: '<b>k</b>ǎolǜ', hanViet: 'Khảo Lự', meaning: 'Cân nhắc, suy nghĩ', level: 'HSK 5', isVip: true },
+      { id: '11', word: '批评', word_display: '批评', pinyin: '<b>p</b>īpíng', hanViet: 'Phê Bình', meaning: 'Phê bình, chỉ trích', level: 'HSK 5', isVip: true },
+      { id: '12', word: '期待', word_display: '期待', pinyin: '<b>q</b>īdài', hanViet: 'Kỳ Đãi', meaning: 'Kỳ vọng, mong đợi', level: 'HSK 5', isVip: true },
+      { id: '13', word: '此外', word_display: '此外', pinyin: '<b>c</b>ǐwài', hanViet: 'Thử Ngoại', meaning: 'Ngoài ra, bên cạnh đó', level: 'HSK 5', isVip: true },
+      { id: '14', word: '破釜沉舟', word_display: '破釜沉舟', pinyin: '<b>p</b>ò fǔ <b>ch</b>én zhōu', hanViet: 'Phá Phủ Trầm Châu', meaning: 'Quyết tử không lùi bước (Thành ngữ)', level: 'HSK 6', isVip: true },
+      { id: '15', word: '克尽职守', word_display: '克尽职守', pinyin: '<b>k</b>è jǐn zhí shǒu', hanViet: 'Khắc Tận Chức Thủ', meaning: 'Tận tụy hoàn thành nhiệm vụ', level: 'HSK 7-9', isVip: true },
+      { id: '16', word: '统筹', word_display: '统筹', pinyin: '<b>t</b>ǒng <b>ch</b>óu', hanViet: 'Thống Trù', meaning: 'Lập kế hoạch tổng thể', level: 'HSK 7-9', isVip: true },
+      { id: '17', word: '趋势', word_display: '趋势', pinyin: '<b>q</b>ū shì', hanViet: 'Khu Thế', meaning: 'Xu thế, xu hướng phát triển', level: 'HSK 7-9', isVip: true }
     ];
 
     function App() {
@@ -78,32 +78,27 @@
       const [cardIndex, setCardIndex] = useState(0);
       const [isFlipped, setIsFlipped] = useState(false);
 
-      // Kiểm tra xem học viên đã nhập mã VIP trước đó chưa
       useEffect(() => {
-        const savedVip = localStorage.getItem('tamthanh_vip_unlocked');
-        if (savedVip === 'true') {
+        if (localStorage.getItem('tamthanh_vip_unlocked') === 'true') {
           setIsVipUnlocked(true);
         }
       }, []);
 
       const handleUnlockVip = (e) => {
         e.preventDefault();
-        // MÃ KÍCH HOẠT BÍ MẬT CỦA BẠN (Bạn có thể đổi mã này thành bất kỳ chuỗi nào tùy ý)
         if (inputCode.trim() === 'TAMTHANH2026' || inputCode.trim() === 'VIP') {
           setIsVipUnlocked(true);
           localStorage.setItem('tamthanh_vip_unlocked', 'true');
-          alert('🎉 Kích hoạt khóa học thành công! Toàn bộ kho từ vựng HSK 4-9 đã được mở.');
+          alert('🎉 Mở khóa thành công toàn bộ hệ thống HSK 1-9!');
           if (window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         } else {
-          alert('❌ Mã kích hoạt không chính xác. Vui lòng liên hệ cô/thầy Tam Thanh để nhận mã.');
+          alert('❌ Mã kích hoạt không chính xác.');
         }
       };
 
       const filteredVocab = useMemo(() => {
         return ALL_VOCAB.filter(item => {
-          // Nếu chưa mua VIP, ẩn các từ VIP đi hoặc làm mờ
           if (!isVipUnlocked && item.isVip) return false;
-
           const matchLevel = selectedLevel === 'ALL' || item.level === selectedLevel;
           const wordText = item.word_display || item.word;
           const matchSearch = searchQuery === '' || 
@@ -118,65 +113,45 @@
 
       return (
         <div className="min-h-screen flex flex-col max-w-2xl mx-auto p-4 space-y-6">
-          
-          {/* HEADER THƯƠNG HIỆU */}
           <header className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-700 to-rose-600 text-white font-black text-xl flex items-center justify-center">
                 三
               </div>
               <div>
-                <h1 className="font-extrabold text-base tracking-tight text-red-700 dark:text-red-500">
-                  Tam Thanh Chinese
-                </h1>
-                <p className="text-[11px] text-slate-500 font-medium">Hệ Thống Học Từ Vựng HSK 1–9 Độc Quyền</p>
+                <h1 className="font-extrabold text-base text-red-700 dark:text-red-500">Tam Thanh Chinese</h1>
+                <p className="text-[11px] text-slate-500 font-medium">Hệ Thống Từ Vựng HSK 1–9 Độc Quyền</p>
               </div>
             </div>
-
             <div>
               {isVipUnlocked ? (
-                <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-black">
-                  ⭐ Học Viên VIP
-                </span>
+                <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-black">⭐ VIP HSK 1-9</span>
               ) : (
-                <span className="px-3 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-black">
-                  🔓 Bản Cơ Bản (Free)
-                </span>
+                <span className="px-3 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-black">🔓 Bản Free (HSK 1-3)</span>
               )}
             </div>
           </header>
 
-          {/* KHU VỰC NHẬP MÃ KÍCH HOẠT KHÓA HỌC (DÀNH CHO HỌC VIÊN ĐÃ MUA HỌC PHÍ) */}
           {!isVipUnlocked && (
             <div className="bg-gradient-to-r from-red-900 to-rose-950 p-5 rounded-3xl text-white space-y-3 shadow-lg">
-              <h2 className="text-sm font-bold flex items-center gap-2">
-                <span>🔒 Mở Khóa Trọn Bộ Khóa Học HSK 4 - 9</span>
-              </h2>
-              <p className="text-xs text-rose-200">
-                Bạn đang học phiên bản miễn phí (HSK 1-3). Nếu bạn đã đăng ký khóa học trả phí, vui lòng nhập mã kích hoạt được cấp để mở toàn bộ tài nguyên:
-              </p>
+              <h2 className="text-sm font-bold">🔒 Mở Khóa Trọn Bộ HSK 4 đến HSK 9</h2>
+              <p className="text-xs text-rose-200">Nhập mã kích hoạt khóa học của bạn để mở toàn bộ từ vựng chuyên sâu:</p>
               <form onSubmit={handleUnlockVip} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Nhập mã kích hoạt (Ví dụ: TAMTHANH2026)"
+                  placeholder="Nhập mã (Ví dụ: TAMTHANH2026)"
                   value={inputCode}
                   onChange={(e) => setInputCode(e.target.value)}
                   className="flex-1 px-3.5 py-2 rounded-xl bg-white/10 border border-white/20 text-xs text-white placeholder-rose-300 outline-none font-mono"
                 />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-white text-red-900 font-bold text-xs rounded-xl hover:bg-rose-100 transition-all"
-                >
-                  Mở Khóa
-                </button>
+                <button type="submit" className="px-4 py-2 bg-white text-red-900 font-bold text-xs rounded-xl">Mở Khóa</button>
               </form>
             </div>
           )}
 
-          {/* BỘ LỌC CẤP ĐỘ & TÌM KIẾM */}
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              {['ALL', 'HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6'].map(lvl => (
+              {['ALL', 'HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSK 7-9'].map(lvl => (
                 <button
                   key={lvl}
                   onClick={() => { setSelectedLevel(lvl); setCardIndex(0); }}
@@ -184,11 +159,10 @@
                     selectedLevel === lvl ? 'bg-red-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  {lvl} {['HSK 4','HSK 5','HSK 6'].includes(lvl) && !isVipUnlocked ? '🔒' : ''}
+                  {lvl} {['HSK 4','HSK 5','HSK 6','HSK 7-9'].includes(lvl) && !isVipUnlocked ? '🔒' : ''}
                 </button>
               ))}
             </div>
-
             <input
               type="text"
               placeholder="Tìm kiếm từ vựng..."
@@ -198,7 +172,6 @@
             />
           </div>
 
-          {/* FLASHCARD HỌC TẬP */}
           {filteredVocab.length > 0 ? (
             <div className="space-y-4">
               <div className="flex justify-between text-xs font-bold text-slate-400">
@@ -216,22 +189,14 @@
 
                 {!isFlipped ? (
                   <div className="my-auto">
-                    <div className="text-6xl font-black hanzi-text">
-                      {currentCard.word_display || currentCard.word}
-                    </div>
+                    <div className="text-6xl font-black hanzi-text">{currentCard.word_display || currentCard.word}</div>
                   </div>
                 ) : (
                   <div className="space-y-2 my-auto">
-                    <div className="text-4xl font-black hanzi-text">
-                      {currentCard.word_display || currentCard.word}
-                    </div>
+                    <div className="text-4xl font-black hanzi-text">{currentCard.word_display || currentCard.word}</div>
                     <div className="text-base font-black text-red-600 font-mono" dangerouslySetInnerHTML={{ __html: `[${currentCard.pinyin}]` }}></div>
-                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400">
-                      Hán Việt: {currentCard.hanViet}
-                    </div>
-                    <div className="text-sm font-bold bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
-                      {currentCard.meaning}
-                    </div>
+                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400">Hán Việt: {currentCard.hanViet}</div>
+                    <div className="text-sm font-bold bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl">{currentCard.meaning}</div>
                   </div>
                 )}
 
@@ -260,14 +225,13 @@
             </div>
           ) : (
             <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-              <p className="text-xs text-slate-500">Không tìm thấy từ vựng hoặc các cấp độ cao đang bị khóa. Vui lòng nhập mã kích hoạt VIP.</p>
+              <p className="text-xs text-slate-500">Không tìm thấy từ vựng hoặc cấp độ này đang bị khóa. Vui lòng nhập mã VIP.</p>
             </div>
           )}
 
           <footer className="text-center text-xs text-slate-400 pt-6">
             Tam Thanh Chinese &copy; 2026 - Nền Tảng Đào Tạo Tiếng Trung Thương Mại
           </footer>
-
         </div>
       );
     }
