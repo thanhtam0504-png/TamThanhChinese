@@ -32,6 +32,9 @@
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     .hanzi-text { font-family: 'Noto Serif SC', serif; }
+    /* Ẩn thanh cuộn thừa nhưng vẫn trượt mượt */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen">
@@ -49,7 +52,6 @@
       window.speechSynthesis.speak(utterance);
     };
 
-    // KHO TỪ VỰNG TÍCH HỢP TRỰC TIẾP (Pinyin in đậm âm bật hơi đúng yêu cầu, kèm Hán Việt)
     const ALL_VOCAB = [
       { id: '1', word: '你好', pinyin: 'nǐ hǎo', hanViet: 'Nhĩ Hảo', meaning: 'Xin chào', level: 'HSK 1', isVip: false },
       { id: '2', word: '谢谢', pinyin: 'xièxie', hanViet: 'Tạ Tạ', meaning: 'Cảm ơn', level: 'HSK 1', isVip: false },
@@ -112,51 +114,51 @@
       const currentCard = filteredVocab[cardIndex] || filteredVocab[0] || ALL_VOCAB[0];
 
       return (
-        <div className="min-h-screen flex flex-col max-w-2xl mx-auto p-4 space-y-6">
+        <div className="min-h-screen flex flex-col max-w-2xl mx-auto p-4 space-y-5">
           <header className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-700 to-rose-600 text-white font-black text-xl flex items-center justify-center">
                 三
               </div>
               <div>
-                <h1 className="font-extrabold text-base text-red-700 dark:text-red-500">Tam Thanh Chinese</h1>
-                <p className="text-[11px] text-slate-500 font-medium">Hệ Thống Từ Vựng HSK 1–9 Độc Quyền</p>
+                <h1 className="font-extrabold text-sm sm:text-base text-red-700 dark:text-red-500">Tam Thanh Chinese</h1>
+                <p className="text-[10px] text-slate-500 font-medium">Hệ Thống Học Từ Vựng HSK 1–9</p>
               </div>
             </div>
             <div>
               {isVipUnlocked ? (
-                <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-black">⭐ VIP HSK 1-9</span>
+                <span className="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 text-[11px] font-black">⭐ VIP</span>
               ) : (
-                <span className="px-3 py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-black">🔓 Bản Free (HSK 1-3)</span>
+                <span className="px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-[11px] font-black">🔓 Free</span>
               )}
             </div>
           </header>
 
           {!isVipUnlocked && (
-            <div className="bg-gradient-to-r from-red-900 to-rose-950 p-5 rounded-3xl text-white space-y-3 shadow-lg">
-              <h2 className="text-sm font-bold">🔒 Mở Khóa Trọn Bộ HSK 4 đến HSK 9</h2>
-              <p className="text-xs text-rose-200">Nhập mã kích hoạt khóa học của bạn để mở toàn bộ từ vựng chuyên sâu:</p>
-              <form onSubmit={handleUnlockVip} className="flex gap-2">
+            <div className="bg-gradient-to-r from-red-900 to-rose-950 p-4 rounded-3xl text-white space-y-2 shadow-lg">
+              <h2 className="text-xs font-bold">🔒 Mở Khóa Trọn Bộ Khóa Học HSK 4 – 9</h2>
+              <form onSubmit={handleUnlockVip} className="flex gap-2 pt-1">
                 <input
                   type="text"
                   placeholder="Nhập mã (Ví dụ: TAMTHANH2026)"
                   value={inputCode}
                   onChange={(e) => setInputCode(e.target.value)}
-                  className="flex-1 px-3.5 py-2 rounded-xl bg-white/10 border border-white/20 text-xs text-white placeholder-rose-300 outline-none font-mono"
+                  className="flex-1 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-xs text-white placeholder-rose-300 outline-none font-mono"
                 />
-                <button type="submit" className="px-4 py-2 bg-white text-red-900 font-bold text-xs rounded-xl">Mở Khóa</button>
+                <button type="submit" className="px-3.5 py-1.5 bg-white text-red-900 font-bold text-xs rounded-xl">Mở Khóa</button>
               </form>
             </div>
           )}
 
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+            {/* Thanh trượt chọn cấp độ được tối ưu cho điện thoại */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
               {['ALL', 'HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSK 7-9'].map(lvl => (
                 <button
                   key={lvl}
                   onClick={() => { setSelectedLevel(lvl); setCardIndex(0); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${
-                    selectedLevel === lvl ? 'bg-red-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                    selectedLevel === lvl ? 'bg-red-700 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {lvl} {['HSK 4','HSK 5','HSK 6','HSK 7-9'].includes(lvl) && !isVipUnlocked ? '🔒' : ''}
@@ -174,7 +176,7 @@
 
           {filteredVocab.length > 0 ? (
             <div className="space-y-4">
-              <div className="flex justify-between text-xs font-bold text-slate-400">
+              <div className="flex justify-between text-xs font-bold text-slate-400 px-1">
                 <span>Thẻ {cardIndex + 1} / {filteredVocab.length}</span>
                 <span className="text-red-600 font-bold">{currentCard.level}</span>
               </div>
@@ -211,13 +213,13 @@
               <div className="flex gap-2">
                 <button
                   onClick={() => { setIsFlipped(false); setCardIndex((prev) => (prev - 1 + filteredVocab.length) % filteredVocab.length); }}
-                  className="flex-1 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-xs rounded-2xl"
+                  className="flex-1 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-xs rounded-2xl shadow-xs"
                 >
                   ← Trước
                 </button>
                 <button
                   onClick={() => { setIsFlipped(false); setCardIndex((prev) => (prev + 1) % filteredVocab.length); }}
-                  className="flex-1 py-3 bg-red-700 text-white font-bold text-xs rounded-2xl"
+                  className="flex-1 py-3 bg-red-700 text-white font-bold text-xs rounded-2xl shadow-md"
                 >
                   Tiếp theo →
                 </button>
@@ -229,8 +231,8 @@
             </div>
           )}
 
-          <footer className="text-center text-xs text-slate-400 pt-6">
-            Tam Thanh Chinese &copy; 2026 - Nền Tảng Đào Tạo Tiếng Trung Thương Mại
+          <footer className="text-center text-xs text-slate-400 pt-4">
+            Tam Thanh Chinese &copy; 2026 - Nền Tảng Đào Tạo Tiếng Trung
           </footer>
         </div>
       );
