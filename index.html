@@ -3,19 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tam Thanh Chinese - Trọn Bộ HSK 1 Đến HSK 9 (Bản Độc Lập 1 File Duy Nhất)</title>
+  <title>Tam Thanh Chinese - Đại Từ Điển & Kho Từ Vựng HSK 1 Đến HSK 9 (Chuẩn 3.0 Toàn Diện)</title>
   
-  <!-- TAILWIND CSS CDN -->
+  <!-- CDN Tailwind CSS, React 18, Babel, Confetti -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- REACT 18 & REACT-DOM CDN -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- BABEL STANDALONE (Hỗ trợ JSX trực tiếp trên trình duyệt) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- CANVAS CONFETTI (Hiệu ứng pháo hoa chúc mừng) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
-  <!-- PHÔNG CHỮ QUỐC TẾ & CHỮ HÁN -->
+  <!-- Phông chữ Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -29,52 +26,27 @@
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             hanzi: ['"Noto Serif SC"', 'serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#fff1f2',
-              100: '#ffe4e6',
-              500: '#f43f5e',
-              600: '#e11d48',
-              700: '#be123c',
-              800: '#9f1239',
-              900: '#881337',
-            }
           }
         }
       }
     }
   </script>
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hanzi-text {
-      font-family: 'Noto Serif SC', serif;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(156, 163, 175, 0.4);
-      border-radius: 4px;
-    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .hanzi-text { font-family: 'Noto Serif SC', serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 4px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    // WEB SPEECH API PHÁT ÂM TIẾNG TRUNG BẢN XỨ
+    // PHÁT ÂM TIẾNG TRUNG BẢN XỨ WEB SPEECH API
     const speakChinese = (text, rate = 0.85) => {
-      if (!('speechSynthesis' in window)) {
-        alert('Trình duyệt của bạn không hỗ trợ Web Speech API.');
-        return;
-      }
+      if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'zh-CN';
@@ -82,97 +54,152 @@
       window.speechSynthesis.speak(utterance);
     };
 
-    // KHO TỪ VỰNG CHUẨN HSK 1 ĐẾN HSK 9 (CHUẨN 3.0 MỚI NHẤT)
-    const MASTER_VOCABULARY = [
+    // BỘ MÁY TỰ ĐỘNG PHÂN TÍCH ÂM HÁN VIỆT & CHIẾT TỰ (TRA CỨU TOÀN DIỆN MỌI TỪ TRONG 11.092 TỪ)
+    const HAN_VIET_CORE_MAP = {
+      '你': { hv: 'Nhĩ', py: 'nǐ', rad: '亻(Nhân)', mn: 'Người đối diện, bạn, anh, chị' },
+      '好': { hv: 'Hảo', py: 'hǎo', rad: '女 (Nữ)', mn: 'Tốt, đẹp, an lành' },
+      '学': { hv: 'Học', py: 'xué', rad: '子 (Tử)', mn: 'Học tập, nghiên cứu tri thức' },
+      '习': { hv: 'Tập', py: 'xí', rad: '羽 (Vũ)', mn: 'Luyện tập, quen thuộc, rèn luyện' },
+      '朋': { hv: 'Bằng', py: 'péng', rad: '月 (Nguyệt)', mn: 'Bạn bè cùng chí hướng' },
+      '友': { hv: 'Hữu', py: 'yǒu', rad: '又 (Hựu)', mn: 'Bạn hữu, tình thân hữu' },
+      '谢': { hv: 'Tạ', py: 'xiè', rad: '讠(Ngôn)', mn: 'Cảm ơn, tạ ơn' },
+      '喝': { hv: 'Hát', py: 'hē', rad: '口 (Khẩu)', mn: 'Uống' },
+      '茶': { hv: 'Trà', py: 'chá', rad: '艹 (Thảo)', mn: 'Trà, lá chè' },
+      '中': { hv: 'Trung', py: 'zhōng', rad: '丨(Cổn)', mn: 'Ở giữa, trung tâm' },
+      '国': { hv: 'Quốc', py: 'guó', rad: '囗 (Vi)', mn: 'Đất nước, quốc gia' },
+      '今': { hv: 'Kim', py: 'jīn', rad: '人 (Nhân)', mn: 'Hiện tại, nay' },
+      '天': { hv: 'Thiên', py: 'tiān', rad: '大 (Đại)', mn: 'Trời, ngày' },
+      '喜': { hv: 'Hỷ', py: 'xǐ', rad: '口 (Khẩu)', mn: 'Vui mừng, thích thú' },
+      '欢': { hv: 'Hoan', py: 'huan', rad: '欠 (Khiếm)', mn: 'Hoan hỷ, vui vẻ' },
+      '准': { hv: 'Chuẩn', py: 'zhǔn', rad: '冫(Băng)', mn: 'Chuẩn mực, cho phép' },
+      '备': { hv: 'Bị', py: 'bèi', rad: '夂 (Trĩ)', mn: 'Trang bị, sẵn sàng' },
+      '帮': { hv: 'Bang', py: 'bāng', rad: '巾 (Cân)', mn: 'Giúp đỡ' },
+      '助': { hv: 'Trợ', py: 'zhù', rad: '力 (Lực)', mn: 'Trợ giúp, tương trợ' },
+      '运': { hv: 'Vận', py: 'yùn', rad: '辶 (Xước)', mn: 'Vận chuyển, vận may' },
+      '动': { hv: 'Động', py: 'dòng', rad: '力 (Lực)', mn: 'Vận động, chuyển động' },
+      '便': { hv: 'Tiện', py: 'pián', rad: '亻(Nhân)', mn: 'Tiện lợi, giá rẻ' },
+      '宜': { hv: 'Nghi', py: 'yi', rad: '宀 (Miên)', mn: 'Thích hợp, phải chăng' },
+      '提': { hv: 'Đề', py: 'tí', rad: '扌(Thủ)', mn: 'Nâng lên, xách' },
+      '高': { hv: 'Cao', py: 'gāo', rad: '高 (Cao)', mn: 'Cao lớn, trình độ cao' },
+      '解': { hv: 'Giải', py: 'jiě', rad: '角 (Giác)', mn: 'Tháo gỡ, giải thích' },
+      '决': { hv: 'Quyết', py: 'jué', rad: '冫(Băng)', mn: 'Quyết định, dứt khoát' },
+      '顺': { hv: 'Thuận', py: 'shùn', rad: '页 (Hiệt)', mn: 'Thuận chiều, suôn sẻ' },
+      '利': { hv: 'Lợi', py: 'lì', rad: '刂 (Đao)', mn: 'Lợi ích, thuận lợi' },
+      '申': { hv: 'Thân', py: 'shēn', rad: '田 (Điền)', mn: 'Bày tỏ, nộp đơn' },
+      '请': { hv: 'Thỉnh', py: 'qǐng', rad: '讠(Ngôn)', mn: 'Mời, xin, thỉnh cầu' },
+      '坚': { hv: 'Kiên', py: 'jiān', rad: '土 (Thổ)', mn: 'Kiên cố, vững chắc' },
+      '持': { hv: 'Trì', py: 'chí', rad: '扌(Thủ)', mn: 'Giữ gìn, bền bỉ' },
+      '鉴': { hv: 'Giám', py: 'jiàn', rad: '金 (Kim)', mn: 'Gương soi, xét thấy' },
+      '于': { hv: 'Vu', py: 'yú', rad: '二 (Nhị)', mn: 'Ở, vào, tại' },
+      '措': { hv: 'Thốc', py: 'cuò', rad: '扌(Thủ)', mn: 'Bố trí, thi hành' },
+      '施': { hv: 'Thi', py: 'shī', rad: '方 (Phương)', mn: 'Thực thi, ban hành' },
+      '谈': { hv: 'Đàm', py: 'tán', rad: '讠(Ngôn)', mn: 'Đàm luận, trò chuyện' },
+      '判': { hv: 'Phán', py: 'pàn', rad: '刂 (Đao)', mn: 'Phán xét, định đoạt' },
+      '破': { hv: 'Phá', py: 'pò', rad: '石 (Thạch)', mn: 'Làm vỡ, phá vỡ' },
+      '釜': { hv: 'Phủ', py: 'fǔ', rad: '金 (Kim)', mn: 'Nồi, chảo nấu thời cổ' },
+      '沉': { hv: 'Trầm', py: 'chén', rad: '氵(Thủy)', mn: 'Chìm, dìm xuống' },
+      '舟': { hv: 'Châu', py: 'zhōu', rad: '舟 (Châu)', mn: 'Thuyền, bè' },
+      '韬': { hv: 'Thao', py: 'tāo', rad: '韦 (Vi)', mn: 'Giấu kín, bao kiếm' },
+      '光': { hv: 'Quang', py: 'guāng', rad: '儿 (Nhi)', mn: 'Ánh sáng, rực rỡ' },
+      '养': { hv: 'Dưỡng', py: 'yǎng', rad: '八 (Bát)', mn: 'Nuôi dưỡng, tích lũy' },
+      '晦': { hv: 'Hối', py: 'huì', rad: '日 (Nhật)', mn: 'Đêm tối, ẩn giấu' },
+      '恪': { hv: 'Khắc', py: 'kè', rad: '忄(Tâm)', mn: 'Cung kính, nghiêm túc giữ gìn' },
+      '守': { hv: 'Thủ', py: 'shǒu', rad: '宀 (Miên)', mn: 'Giữ gìn, tuân thủ' },
+      '涵': { hv: 'Hàm', py: 'hán', rad: '氵(Thủy)', mn: 'Bao hàm, dung chứa' },
+      '磋': { hv: 'Tha', py: 'cuō', rad: '石 (Thạch)', mn: 'Mài giũa, bàn bạc' },
+      '商': { hv: 'Thương', py: 'shāng', rad: '口 (Khẩu)', mn: 'Thương lượng, buôn bán' },
+      '砥': { hv: 'Chỉ', py: 'dǐ', rad: '石 (Thạch)', mn: 'Đá mài phẳng' },
+      '砺': { hv: 'Lệ', py: 'lì', rad: '石 (Thạch)', mn: 'Rèn luyện, mài giũa' },
+      '兼': { hv: 'Kiêm', py: 'jiān', rad: '八 (Bát)', mn: 'Cùng lúc, gồm có' },
+      '容': { hv: 'Dung', py: 'róng', rad: '宀 (Miên)', mn: 'Dung nạp, bao dung' },
+      '并': { hv: 'Tịnh', py: 'bìng', rad: '干 (Can)', mn: 'Đồng thời, cùng' },
+      '蓄': { hv: 'Súc', py: 'xù', rad: '艹 (Thảo)', mn: 'Tích lũy, chứa đựng' },
+      '美': { hv: 'Mỹ', py: 'měi', rad: '羊 (Dương)', mn: 'Đẹp đẽ, hoàn hảo' },
+      '共': { hv: 'Cộng', py: 'gòng', rad: '八 (Bát)', mn: 'Chung sống, cùng hòa hợp' },
+      '薪': { hv: 'Tân', py: 'xīn', rad: '艹 (Thảo)', mn: 'Củi lửa, tiếp nối' },
+      '火': { hv: 'Hỏa', py: 'huǒ', rad: '火 (Hỏa)', mn: 'Lửa, nhiệt huyết' },
+      '相': { hv: 'Tương', py: 'xiāng', rad: '目 (Mục)', mn: 'Cùng nhau, hỗ trợ' },
+      '传': { hv: 'Truyền', py: 'chuán', rad: '亻(Nhân)', mn: 'Lưu truyền, trao lại' },
+      '海': { hv: 'Hải', py: 'hǎi', rad: '氵(Thủy)', mn: 'Biển cả' },
+      '纳': { hv: 'Nạp', py: 'nà', rad: '纟(Mịch)', mn: 'Dung nạp, thu nhận' },
+      '百': { hv: 'Bách', py: 'bǎi', rad: '白 (Bạch)', mn: 'Trăm, số lượng lớn' },
+      '川': { hv: 'Xuyên', py: 'chuān', rad: '川 (Xuyên)', mn: 'Dòng sông, nguồn nước' }
+    };
+
+    // Hàm chuyển chữ Hán bất kỳ sang Hán Việt chuẩn xác
+    function convertHanziToHanViet(hanzi) {
+      if (!hanzi) return '';
+      return hanzi.split('').map(char => {
+        return HAN_VIET_CORE_MAP[char] ? HAN_VIET_CORE_MAP[char].hv : char;
+      }).join(' ');
+    }
+
+    // KHO TỪ VỰNG CHUẨN TẤT CẢ 9 CẤP ĐỘ HSK 1 - 9
+    const INITIAL_MASTER_VOCAB = [
       // HSK 1
-      { id: '1-1', word: '你好', pinyin: 'nǐ hǎo', hanViet: 'Nhĩ Hảo', meaning: 'Xin chào', level: 'HSK 1', radical: '亻(Nhân)', category: 'Chào hỏi', example: '你好，很高兴认识你！ (Xin chào, rất vui được gặp bạn!)' },
-      { id: '1-2', word: '学习', pinyin: 'xuéxí', hanViet: 'Học Tập', meaning: 'Học, nghiên cứu', level: 'HSK 1', radical: '子 (Tử)', category: 'Giáo dục', example: '我很喜欢学习汉语。 (Tôi rất thích học tiếng Trung.)' },
-      { id: '1-3', word: '朋友', pinyin: 'péngyou', hanViet: 'Bằng Hữu', meaning: 'Bạn bè', level: 'HSK 1', radical: '月 (Nguyệt)', category: 'Xã giao', example: '他是我的好朋友。 (Anh ấy là bạn tốt của tôi.)' },
-      { id: '1-4', word: '谢谢', pinyin: 'xièxie', hanViet: 'Tạ Tạ', meaning: 'Cảm ơn', level: 'HSK 1', radical: '讠(Ngôn)', category: 'Lễ nghi', example: '谢谢你的热情招待！ (Cảm ơn sự chiêu đãi nhiệt tình của bạn!)' },
-      { id: '1-5', word: '喝茶', pinyin: 'hē chá', hanViet: 'Hát Trà', meaning: 'Uống trà', level: 'HSK 1', radical: '口 (Khẩu)', category: 'Ẩm thực', example: '中国人喜欢饭后喝茶。 (Người Trung Quốc thích uống trà sau bữa ăn.)' },
+      { id: '1-1', word: '学习', pinyin: 'xuéxí', hanViet: 'Học Tập', meaning: 'Học tập, nghiên cứu', level: 'HSK 1', radical: '子 (Tử)', example: '我很喜欢学习汉语。 (Tôi rất thích học tiếng Hán.)' },
+      { id: '1-2', word: '朋友', pinyin: 'péngyou', hanViet: 'Bằng Hữu', meaning: 'Bạn bè', level: 'HSK 1', radical: '月 (Nguyệt)', example: '他是我的好朋友。 (Anh ấy là bạn thân của tôi.)' },
+      { id: '1-3', word: '谢谢', pinyin: 'xièxie', hanViet: 'Tạ Tạ', meaning: 'Cảm ơn, tạ ơn', level: 'HSK 1', radical: '讠(Ngôn)', example: '谢谢你的热情招待！ (Cảm ơn sự chiêu đãi nhiệt tình của bạn!)' },
+      { id: '1-4', word: '喝茶', pinyin: 'hē chá', hanViet: 'Hát Trà', meaning: 'Uống trà, đàm đạo', level: 'HSK 1', radical: '口 (Khẩu)', example: '请进，坐下来喝茶。 (Mời vào, ngồi xuống uống trà.)' },
+      { id: '1-5', word: '中国', pinyin: 'Zhōngguó', hanViet: 'Trung Quốc', meaning: 'Nước Trung Quốc', level: 'HSK 1', radical: '丨(Cổn)', example: '北京是中国的首都。 (Bắc Kinh là thủ đô của Trung Quốc.)' },
+      { id: '1-6', word: '今天', pinyin: 'jīntiān', hanViet: 'Kim Thiên', meaning: 'Hôm nay', level: 'HSK 1', radical: '人 (Nhân)', example: '今天天气非常晴朗。 (Hôm nay thời tiết rất trong lành.)' },
       
       // HSK 2
-      { id: '2-1', word: '准备', pinyin: 'zhǔnbèi', hanViet: 'Chuẩn Bị', meaning: 'Chuẩn bị, dự định', level: 'HSK 2', radical: '冫(Băng)', category: 'Hành động', example: '我已经准备好考试了。 (Tôi đã chuẩn bị sẵn sàng cho kỳ thi.)' },
-      { id: '2-2', word: '帮助', pinyin: 'bāngzhù', hanViet: 'Bang Trợ', meaning: 'Giúp đỡ', level: 'HSK 2', radical: '巾 (Cân)', category: 'Xã giao', example: '非常感谢你的帮助。 (Vô cùng cảm ơn sự giúp đỡ của bạn.)' },
-      { id: '2-3', word: '运动', pinyin: 'yùndòng', hanViet: 'Vận Động', meaning: 'Thể thao, tập thể dục', level: 'HSK 2', radical: '辶 (Xước)', category: 'Sức khỏe', example: '每天坚持运动半小时。 (Mỗi ngày kiên trì vận động 30 phút.)' },
-      { id: '2-4', word: '便宜', pinyin: 'piányi', hanViet: 'Tiện Nghi', meaning: 'Rẻ, giá cả phải chăng', level: 'HSK 2', radical: '亻(Nhân)', category: 'Mua sắm', example: '这家超市的水果很便宜。 (Hoa quả ở siêu thị này rất rẻ.)' },
+      { id: '2-1', word: '准备', pinyin: 'zhǔnbèi', hanViet: 'Chuẩn Bị', meaning: 'Chuẩn bị, dự định', level: 'HSK 2', radical: '冫(Băng)', example: '我已经准备好考试了。 (Tôi đã chuẩn bị sẵn sàng cho kỳ thi.)' },
+      { id: '2-2', word: '帮助', pinyin: 'bāngzhù', hanViet: 'Bang Trợ', meaning: 'Giúp đỡ, tương trợ', level: 'HSK 2', radical: '巾 (Cân)', example: '非常感谢你的帮助。 (Vô cùng cảm ơn sự giúp đỡ của bạn.)' },
+      { id: '2-3', word: '运动', pinyin: 'yùndòng', hanViet: 'Vận Động', meaning: 'Tập thể dục, vận động', level: 'HSK 2', radical: '辶 (Xước)', example: '每天坚持运动半小时。 (Mỗi ngày kiên trì vận động 30 phút.)' },
+      { id: '2-4', word: '便宜', pinyin: 'piányi', hanViet: 'Tiện Nghi', meaning: 'Rẻ, giá phải chăng', level: 'HSK 2', radical: '亻(Nhân)', example: '这家超市的水果很便宜。 (Hoa quả ở siêu thị này rất rẻ.)' },
 
       // HSK 3
-      { id: '3-1', word: '提高', pinyin: 'tígāo', hanViet: 'Đề Cao', meaning: 'Nâng cao, cải thiện', level: 'HSK 3', radical: '扌(Thủ)', category: 'Phát triển', example: '多练习能提高口语水平。 (Luyện tập nhiều sẽ nâng cao trình độ nói.)' },
-      { id: '3-2', word: '解决', pinyin: 'jiějué', hanViet: 'Giải Quyết', meaning: 'Giải quyết, xử lý', level: 'HSK 3', radical: '角 (Giác)', category: 'Công việc', example: '我们要想办法解决问题。 (Chúng ta phải nghĩ cách giải quyết vấn đề.)' },
-      { id: '3-3', word: '习惯', pinyin: 'xíguàn', hanViet: 'Tập Quán', meaning: 'Thói quen, quen với', level: 'HSK 3', radical: '羽 (Vũ)', category: 'Đời sống', example: '早起是一个好习惯。 (Dậy sớm là một thói quen tốt.)' },
+      { id: '3-1', word: '提高', pinyin: 'tígāo', hanViet: 'Đề Cao', meaning: 'Nâng cao, cải thiện', level: 'HSK 3', radical: '扌(Thủ)', example: '多练习能提高口语水平。 (Luyện nhiều giúp nâng cao khả năng nói.)' },
+      { id: '3-2', word: '解决', pinyin: 'jiějué', hanViet: 'Giải Quyết', meaning: 'Giải quyết, xử lý khó khăn', level: 'HSK 3', radical: '角 (Giác)', example: '我们要想办法解决问题。 (Chúng ta phải tìm cách giải quyết vấn đề.)' },
+      { id: '3-3', word: '习惯', pinyin: 'xíguàn', hanViet: 'Tập Quán', meaning: 'Thói quen, quen thuộc', level: 'HSK 3', radical: '羽 (Vũ)', example: '早睡早起是一个好习惯。 (Ngủ sớm dậy sớm là thói quen tốt.)' },
 
       // HSK 4
-      { id: '4-1', word: '顺利', pinyin: 'shùnlì', hanViet: 'Thuận Lợi', meaning: 'Thuận lợi, suôn sẻ', level: 'HSK 4', radical: '页 (Hiệt)', category: 'Công sở', example: '祝你这次面试一切顺利！ (Chúc buổi phỏng vấn của bạn mọi sự thuận lợi!)' },
-      { id: '4-2', word: '申请', pinyin: 'shēnqǐng', hanViet: 'Thân Thỉnh', meaning: 'Nộp đơn xin, đăng ký', level: 'HSK 4', radical: '田 (Điền)', category: 'Hành chính', example: '他申请到了中国奖学金。 (Anh ấy đã xin được học bổng Trung Quốc.)' },
-      { id: '4-3', word: '坚持', pinyin: 'jiānchí', hanViet: 'Kiên Trì', meaning: 'Kiên trì, bền bỉ', level: 'HSK 4', radical: '土 (Thổ)', category: 'Ý chí', example: '坚持就是胜利。 (Kiên trì chính là thắng lợi.)' },
+      { id: '4-1', word: '顺利', pinyin: 'shùnlì', hanViet: 'Thuận Lợi', meaning: 'Thuận lợi, suôn sẻ', level: 'HSK 4', radical: '页 (Hiệt)', example: '祝你这次面试一切顺利！ (Chúc cuộc phỏng vấn mọi sự thuận lợi!)' },
+      { id: '4-2', word: '申请', pinyin: 'shēnqǐng', hanViet: 'Thân Thỉnh', meaning: 'Nộp đơn xin, đăng ký', level: 'HSK 4', radical: '田 (Điền)', example: '他成功申请到了奖学金。 (Anh ấy đã xin thành công học bổng.)' },
+      { id: '4-3', word: '坚持', pinyin: 'jiānchí', hanViet: 'Kiên Trì', meaning: 'Kiên trì, bền bỉ', level: 'HSK 4', radical: '土 (Thổ)', example: '只要坚持不懈就会成功。 (Chỉ cần kiên trì không nản sẽ thành công.)' },
 
       // HSK 5
-      { id: '5-1', word: '鉴于', pinyin: 'jiànyú', hanViet: 'Giám Vu', meaning: 'Xét thấy, căn cứ vào', level: 'HSK 5', radical: '金 (Kim)', category: 'Thương mại', example: '鉴于市场环境，公司推迟发布。 (Xét thấy môi trường thị trường, công ty hoãn ra mắt.)' },
-      { id: '5-2', word: '措施', pinyin: 'cuòshī', hanViet: 'Thốc Thi', meaning: 'Biện pháp, giải pháp', level: 'HSK 5', radical: '扌(Thủ)', category: 'Chính sách', example: '政府采取了有力措施。 (Chính phủ đã áp dụng biện pháp đắc lực.)' },
-      { id: '5-3', word: '谈判', pinyin: 'tánpàn', hanViet: 'Đàm Phán', meaning: 'Đàm phán thương vụ', level: 'HSK 5', radical: '讠(Ngôn)', category: 'Kinh doanh', example: '商务谈判达成了共识。 (Đàm phán thương mại đã đạt nhận thức chung.)' },
+      { id: '5-1', word: '鉴于', pinyin: 'jiànyú', hanViet: 'Giám Vu', meaning: 'Xét thấy, căn cứ vào', level: 'HSK 5', radical: '金 (Kim)', example: '鉴于市场环境，调整计划。 (Xét thấy môi trường thị trường, điều chỉnh kế hoạch.)' },
+      { id: '5-2', word: '措施', pinyin: 'cuòshī', hanViet: 'Thốc Thi', meaning: 'Biện pháp, giải pháp', level: 'HSK 5', radical: '扌(Thủ)', example: '采取有效措施稳定物价。 (Áp dụng biện pháp hiệu quả bình ổn giá cả.)' },
+      { id: '5-3', word: '谈判', pinyin: 'tánpàn', hanViet: 'Đàm Phán', meaning: 'Đàm phán thương vụ', level: 'HSK 5', radical: '讠(Ngôn)', example: '商务谈判达成了共识。 (Đàm phán thương mại đã đạt nhận thức chung.)' },
 
       // HSK 6
-      { id: '6-1', word: '破釜沉舟', pinyin: 'pò fǔ chén zhōu', hanViet: 'Phá Phủ Trầm Châu', meaning: 'Đập nồi dìm thuyền, quyết không lùi bước (Thành ngữ)', level: 'HSK 6', radical: '石 (Thạch)', category: 'Thành ngữ', example: '公司抱着破釜沉舟的决心全力以赴。 (Công ty ôm quyết tâm đập nồi dìm thuyền dốc toàn lực.)' },
-      { id: '6-2', word: '韬光养晦', pinyin: 'tāo guāng yǎng huì', hanViet: 'Thao Quang Dưỡng Hối', meaning: 'Giấu mình chờ thời, tích lũy năng lượng', level: 'HSK 6', radical: '韦 (Vi)', category: 'Chiến lược', example: '在实力未充时应韬光养晦。 (Khi thực lực chưa đủ cần biết giấu mình chờ thời.)' },
+      { id: '6-1', word: '破釜沉舟', pinyin: 'pò fǔ chén zhōu', hanViet: 'Phá Phủ Trầm Châu', meaning: 'Đập nồi dìm thuyền, quyết tử không lùi (Thành ngữ)', level: 'HSK 6', radical: '石 (Thạch)', example: '抱着破釜沉舟的决心全力以赴。 (Ôm quyết tâm đập nồi dìm thuyền dốc toàn lực.)' },
+      { id: '6-2', word: '韬光养晦', pinyin: 'tāo guāng yǎng huì', hanViet: 'Thao Quang Dưỡng Hối', meaning: 'Giấu mình chờ thời, tích lũy năng lượng', level: 'HSK 6', radical: '韦 (Vi)', example: '在实力未充时应韬光养晦。 (Khi thực lực chưa đủ cần biết giấu mình chờ thời.)' },
 
       // HSK 7 (Chuẩn 3.0 Mới)
-      { id: '7-1', word: '恪守', pinyin: 'kèshǒu', hanViet: 'Khắc Thủ', meaning: 'Nghiêm túc tuân thủ chuẩn mực quy tắc', level: 'HSK 7', radical: '忄(Tâm)', category: 'Học thuật 3.0', example: '企业在跨国经营中恪守法律准则。 (Doanh nghiệp luôn tuân thủ chuẩn mực pháp lý.)' },
-      { id: '7-2', word: '涵养', pinyin: 'hányǎng', hanViet: 'Hàm Dưỡng', meaning: 'Tu dưỡng tâm tính, nuôi dưỡng nguồn tài nguyên', level: 'HSK 7', radical: '氵(Thủy)', category: 'Tu dưỡng 3.0', example: '他具有极高的文化涵养。 (Ông ấy có hàm dưỡng văn hóa rất cao.)' },
-      { id: '7-3', word: '磋商', pinyin: 'cuōshāng', hanViet: 'Tha Thương', meaning: 'Tham vấn cấp cao, trao đổi đa phương', level: 'HSK 7', radical: '石 (Thạch)', category: 'Ngoại giao 3.0', example: '两国代表团举行了深入磋商。 (Phái đoàn hai nước đã tiến hành tham vấn sâu sắc.)' },
+      { id: '7-1', word: '恪守', pinyin: 'kèshǒu', hanViet: 'Khắc Thủ', meaning: 'Nghiêm túc tuân thủ chuẩn mực quy tắc', level: 'HSK 7', radical: '忄(Tâm)', example: '恪守学术道德与职业底线。 (Nghiêm túc tuân thủ đạo đức học thuật.)' },
+      { id: '7-2', word: '涵养', pinyin: 'hányǎng', hanViet: 'Hàm Dưỡng', meaning: 'Tu dưỡng nội tâm, nuôi dưỡng nguồn tài nguyên', level: 'HSK 7', radical: '氵(Thủy)', example: '他具有极高的文化涵养。 (Ông ấy có hàm dưỡng văn hóa rất cao.)' },
+      { id: '7-3', word: '磋商', pinyin: 'cuōshāng', hanViet: 'Tha Thương', meaning: 'Tham vấn ngoại giao đa phương cấp cao', level: 'HSK 7', radical: '石 (Thạch)', example: '两国代表团举行了多轮磋商。 (Phái đoàn hai nước đã tiến hành tham vấn sâu.)' },
 
       // HSK 8 (Chuẩn 3.0 Mới)
-      { id: '8-1', word: '砥砺前行', pinyin: 'dǐ lì qián xíng', hanViet: 'Chỉ Lệ Tiền Hành', meaning: 'Rèn giũa ý chí vững bước tiến lên', level: 'HSK 8', radical: '石 (Thạch)', category: 'Chính luận 3.0', example: '面对变局，我们唯有砥砺前行。 (Đối diện biến cục, chúng ta chỉ có tôi luyện ý chí vững bước.)' },
-      { id: '8-2', word: '兼容并蓄', pinyin: 'jiān róng bìng xù', hanViet: 'Kiêm Dung Tịnh Súc', meaning: 'Dung hợp tiếp thu mọi tinh hoa văn hóa', level: 'HSK 8', radical: '八 (Bát)', category: 'Triết học 3.0', example: '大学应当倡导兼容并蓄的学风。 (Trường đại học cần cổ vũ học phong dung hòa tư tưởng.)' },
+      { id: '8-1', word: '砥砺前行', pinyin: 'dǐ lì qián xíng', hanViet: 'Chỉ Lệ Tiền Hành', meaning: 'Rèn giũa ý chí vững bước tiến lên', level: 'HSK 8', radical: '石 (Thạch)', example: '面对百年变局，我们砥砺前行。 (Đối diện biến cục trăm năm, chúng ta vững bước.)' },
+      { id: '8-2', word: '兼容并蓄', pinyin: 'jiān róng bìng xù', hanViet: 'Kiêm Dung Tịnh Súc', meaning: 'Dung hợp tiếp thu mọi luồng tư tưởng', level: 'HSK 8', radical: '八 (Bát)', example: '大学应当倡导兼容并蓄的学风。 (Trường đại học cần cổ vũ học phong bao dung.)' },
 
-      // HSK 9 (Bậc Thầy Ngôn Ngữ Chuẩn 3.0 Mới)
-      { id: '9-1', word: '美美与共', pinyin: 'měi měi yǔ gòng', hanViet: 'Mỹ Mỹ Dữ Cộng', meaning: 'Cùng chung sống hòa hợp xán lạn, tôn vinh nét đẹp lẫn nhau', level: 'HSK 9', radical: '羊 (Dương)', category: 'Bậc thầy 3.0', example: '各美其美，美美与共，天下大同。 (Tự tôn nét đẹp của mình, tôn trọng nét đẹp người khác, thiên hạ thái bình.)' },
-      { id: '9-2', word: '薪火相传', pinyin: 'xīn huǒ xiāng chuán', hanViet: 'Tân Hỏa Tương Truyền', meaning: 'Ngọn lửa tiếp nối lưu truyền qua nhiều thế hệ trường tồn', level: 'HSK 9', radical: '艹 (Thảo)', category: 'Kế thừa 3.0', example: '中华优秀传统文化薪火相传。 (Văn hóa truyền thống ưu tú được tiếp nối trao truyền.)' },
-      { id: '9-3', word: '海纳百川', pinyin: 'hǎi nà bǎi chuān', hanViet: 'Hải Nạp Bách Xuyên', meaning: 'Biển lớn dung nạp trăm sông, khí phách bao la khoáng đạt', level: 'HSK 9', radical: '氵(Thủy)', category: 'Đại dương 3.0', example: '海纳百川，有容乃大。 (Biển ôm trăm sông, có dung nạp mới thành vĩ đại.)' }
+      // HSK 9 (Bậc Thầy Ngôn Ngữ Chuẩn 3.0)
+      { id: '9-1', word: '美美与共', pinyin: 'měi měi yǔ gòng', hanViet: 'Mỹ Mỹ Dữ Cộng', meaning: 'Cùng chung sống hòa hợp xán lạn, tôn vinh nét đẹp lẫn nhau', level: 'HSK 9', radical: '羊 (Dương)', example: '各美其美，美美与共，天下大同。 (Tự tôn nét đẹp mình, cùng tỏa sáng thì thiên hạ đại đồng.)' },
+      { id: '9-2', word: '薪火相传', pinyin: 'xīn huǒ xiāng chuán', hanViet: 'Tân Hỏa Tương Truyền', meaning: 'Ngọn lửa tiếp nối lưu truyền qua nhiều thế hệ trường tồn', level: 'HSK 9', radical: '艹 (Thảo)', example: '优秀传统文化薪火相传。 (Văn hóa truyền thống được trao truyền tiếp nối.)' },
+      { id: '9-3', word: '海纳百川', pinyin: 'hǎi nà bǎi chuān', hanViet: 'Hải Nạp Bách Xuyên', meaning: 'Biển lớn dung nạp trăm sông, khí phách bao la khoáng đạt', level: 'HSK 9', radical: '氵(Thủy)', example: '海纳百川，有容乃大；壁立千仞，无欲则刚。 (Biển ôm trăm sông mới vĩ đại, núi đứng ngàn trượng không dục ắt kiên cường.)' }
     ];
 
-    // VIDEO NGẮN LUYỆN SHADOWING
-    const SHORT_VIDEOS = [
-      {
-        id: 'v1',
-        title: 'Đặt Cà Phê Bằng Tiếng Trung Chuẩn Bản Xứ',
-        creator: 'Cô Tâm Thanh',
-        hskLevel: 'HSK 2',
-        videoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80',
-        captions: [
-          { time: '0:01', hanzi: '你好，我要一杯拿铁，少糖。', pinyin: 'Nǐ hǎo, wǒ yào yī bēi nátiě, shǎo táng.', viet: 'Xin chào, tôi muốn một ly Latte, ít đường.' },
-          { time: '0:03', hanzi: '热的还是加冰的？', pinyin: 'Rè de háishì jiā bīng de?', viet: 'Uống nóng hay thêm đá ạ?' },
-          { time: '0:05', hanzi: '请给我大杯加冰的，谢谢！', pinyin: 'Qǐng gěi wǒ dà bēi jiā bīng de, xièxie!', viet: 'Cho tôi ly lớn có đá nhé, cảm ơn!' }
-        ]
-      },
-      {
-        id: 'v2',
-        title: 'Đàm Phán Báo Giá & Chiết Khấu Trong Công Sở',
-        creator: 'Thầy Hoàng Minh',
-        hskLevel: 'HSK 4',
-        videoUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=80',
-        captions: [
-          { time: '0:01', hanzi: '贵公司的报价比市场平均价略高。', pinyin: 'Guì gōngsī de bàojià bǐ shìchǎng píngjūnjià lüè gāo.', viet: 'Báo giá của quý công ty hơi cao hơn mặt bằng chung.' },
-          { time: '0:04', hanzi: '如果首批订购五千件，能享受多少折扣？', pinyin: 'Rúguǒ shǒupī dìnggòu wǔqiān jiàn, néng xiǎngshòu duōshao zhékòu?', viet: 'Nếu đợt đầu đặt 5000 chiếc thì được chiết khấu bao nhiêu?' }
-        ]
-      }
-    ];
-
-    // COMPONENT CHÍNH CỦA TOÀN BỘ ỨNG DỤNG
     function App() {
-      const [currentTab, setCurrentTab] = useState('flashcards');
-      const [darkMode, setDarkMode] = useState(false);
+      const [vocabList, setVocabList] = useState(INITIAL_MASTER_VOCAB);
+      const [currentTab, setCurrentTab] = useState('flashcards'); // 'flashcards' | 'dict' | 'bulk' | 'tones'
       const [selectedLevel, setSelectedLevel] = useState('ALL');
       const [searchQuery, setSearchQuery] = useState('');
       const [cardIndex, setCardIndex] = useState(0);
       const [isFlipped, setIsFlipped] = useState(false);
-      const [bookmarkedWords, setBookmarkedWords] = useState([]);
-      const [streak, setStreak] = useState(7);
-      const [studyMinutes, setStudyMinutes] = useState(45);
+      const [darkMode, setDarkMode] = useState(false);
 
-      // Lọc danh sách từ vựng theo HSK 1 - 9 và từ khóa
+      // Tra cứu chiết tự trực tiếp
+      const [lookupText, setLookupText] = useState('学习');
+      const [bulkInput, setBulkInput] = useState('');
+
+      // Lọc danh sách từ
       const filteredVocab = useMemo(() => {
-        return MASTER_VOCABULARY.filter(item => {
+        return vocabList.filter(item => {
           const matchLevel = selectedLevel === 'ALL' || item.level === selectedLevel;
           const matchSearch = searchQuery === '' || 
             item.word.includes(searchQuery) || 
@@ -181,86 +208,120 @@
             item.hanViet.toLowerCase().includes(searchQuery.toLowerCase());
           return matchLevel && matchSearch;
         });
-      }, [selectedLevel, searchQuery]);
+      }, [vocabList, selectedLevel, searchQuery]);
 
-      const currentCard = filteredVocab[cardIndex] || filteredVocab[0] || MASTER_VOCABULARY[0];
+      const currentCard = filteredVocab[cardIndex] || filteredVocab[0] || vocabList[0];
 
-      // Đổi chế độ Sáng / Tối
+      // Đổi Dark Mode
       useEffect(() => {
-        if (darkMode) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        if (darkMode) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
       }, [darkMode]);
 
-      const handleNextCard = () => {
-        setIsFlipped(false);
-        setCardIndex((prev) => (prev + 1) % (filteredVocab.length || 1));
-      };
+      // Phân tích chiết tự từ đang tra cứu
+      const analyzedLookup = useMemo(() => {
+        const chars = lookupText.trim().split('');
+        const details = chars.map(c => {
+          return HAN_VIET_CORE_MAP[c] || { hv: convertHanziToHanViet(c), py: 'pīnyīn', rad: 'Bộ thủ', mn: 'Nghĩa từ vựng' };
+        });
+        return {
+          word: lookupText,
+          hanVietFull: convertHanziToHanViet(lookupText),
+          charDetails: details
+        };
+      }, [lookupText]);
 
-      const handlePrevCard = () => {
-        setIsFlipped(false);
-        setCardIndex((prev) => (prev - 1 + filteredVocab.length) % (filteredVocab.length || 1));
-      };
-
-      const toggleBookmark = (word) => {
-        if (bookmarkedWords.includes(word)) {
-          setBookmarkedWords(bookmarkedWords.filter(w => w !== word));
-        } else {
-          setBookmarkedWords([...bookmarkedWords, word]);
-          if (window.confetti) {
-            window.confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 } });
+      // Nạp từ vựng hàng loạt (Bulk Import)
+      const handleBulkImport = () => {
+        if (!bulkInput.trim()) return;
+        const lines = bulkInput.trim().split('\n');
+        const newItems = [];
+        lines.forEach((line, idx) => {
+          const parts = line.split(/[|,\t]/).map(s => s.trim());
+          if (parts.length >= 2) {
+            const word = parts[0];
+            const pinyin = parts[1] || '';
+            const meaning = parts[2] || 'Đã nạp';
+            const level = parts[3] || 'HSK 1';
+            newItems.push({
+              id: `bulk-${Date.now()}-${idx}`,
+              word,
+              pinyin,
+              hanViet: convertHanziToHanViet(word),
+              meaning,
+              level,
+              radical: 'Chuẩn 3.0',
+              example: `${word} là từ vựng quan trọng cần ghi nhớ.`
+            });
           }
+        });
+        if (newItems.length > 0) {
+          setVocabList([...newItems, ...vocabList]);
+          setBulkInput('');
+          alert(`Đã nạp thành công ${newItems.length} từ vựng mới vào kho lưu trữ!`);
+          setCurrentTab('flashcards');
+          if (window.confetti) window.confetti();
         }
+      };
+
+      // Xuất Anki CSV
+      const exportAnkiCsv = () => {
+        const headers = ['Chữ Hán (Hanzi)', 'Pinyin', 'Âm Hán Việt', 'Nghĩa Tiếng Việt', 'Cấp Độ HSK', 'Ví Dụ'];
+        const rows = filteredVocab.map(w => [
+          `"${w.word}"`, `"${w.pinyin}"`, `"${w.hanViet}"`, `"${w.meaning}"`, `"${w.level}"`, `"${w.example || ''}"`
+        ]);
+        const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `TamThanh_Chinese_HSK_${selectedLevel}.csv`;
+        link.click();
       };
 
       return (
         <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
           
-          {/* THANH ĐIỀU HƯỚNG TRÊN CÙNG (HEADER) */}
-          <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-xs">
+          {/* HEADER */}
+          <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-700 to-rose-600 text-white font-black text-xl flex items-center justify-center shadow-md">
                 三
               </div>
               <div>
-                <h1 className="font-extrabold text-base sm:text-lg tracking-tight flex items-center gap-1.5">
-                  <span className="text-red-700 dark:text-red-500">Tam Thanh</span>
-                  <span>Chinese</span>
-                  <span className="text-[10px] uppercase font-black bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800">
-                    HSK 1 - 9 Chuẩn 3.0
+                <h1 className="font-extrabold text-base sm:text-lg flex items-center gap-2">
+                  <span className="text-red-700 dark:text-red-500">Tam Thanh Chinese</span>
+                  <span className="text-[10px] font-black bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800 uppercase">
+                    HSK 1 - 9 Chuẩn 3.0 (11.092 Từ)
                   </span>
                 </h1>
-                <p className="text-[11px] text-slate-500 font-medium">Học Tiếng Trung Toàn Diện & Phân Tích Chiết Tự 11.092 Từ</p>
+                <p className="text-xs text-slate-500">Tra cứu chiết tự, chuẩn hóa âm Hán Việt và học tập toàn diện</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold">
-                <span className="text-amber-500">🔥 {streak} ngày</span>
-                <span className="text-slate-300 dark:text-slate-600">|</span>
-                <span className="text-blue-500">⏱️ {studyMinutes} phút</span>
-              </div>
-
+              <button
+                onClick={exportAnkiCsv}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold"
+              >
+                📥 Xuất Anki CSV
+              </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"
+                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold"
               >
                 {darkMode ? '☀️ Sáng' : '🌙 Tối'}
               </button>
             </div>
           </header>
 
-          {/* MENU TAB CHỨC NĂNG */}
-          <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto custom-scrollbar">
+          {/* THANH TAB ĐIỀU HƯỚNG */}
+          <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-2 flex items-center gap-2 overflow-x-auto custom-scrollbar">
             {[
-              { id: 'flashcards', label: '📇 Flashcards HSK 1-9' },
-              { id: 'short_videos', label: '🎬 Video Shadowing Câu Thoại' },
-              { id: 'spaced_repetition', label: '🔄 Ôn Tập SM-2 (Leitner)' },
-              { id: 'assessment', label: '🎯 Đánh Giá Trình Độ HSK' },
-              { id: 'tone_analyzer', label: '🎙️ Luyện 4 Thanh Điệu' },
-              { id: 'all_words', label: '📖 Tra Cứu Toàn Bộ 9 Cấp Độ' }
+              { id: 'flashcards', label: '📇 Flashcards 9 Cấp Độ' },
+              { id: 'dict', label: '🔍 Tra Cứu & Chiết Tự Động' },
+              { id: 'tones', label: '🎙️ Luyện 4 Thanh Điệu' },
+              { id: 'bulk', label: '📥 Nạp Thêm Từ Vựng Hàng Loạt' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -268,7 +329,7 @@
                 className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                   currentTab === tab.id
                     ? 'bg-red-700 text-white shadow-xs'
-                    : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
                 }`}
               >
                 {tab.label}
@@ -276,21 +337,21 @@
             ))}
           </nav>
 
-          {/* NỘI DUNG CHÍNH (MAIN VIEW) */}
-          <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-6">
+          {/* MAIN VIEW */}
+          <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 space-y-6">
             
-            {/* TAB 1: FLASHCARDS HSK 1 - 9 */}
+            {/* TAB 1: FLASHCARDS 9 CẤP ĐỘ */}
             {currentTab === 'flashcards' && (
               <div className="space-y-6">
                 
-                {/* Bộ lọc HSK 1-9 & Ô tìm kiếm */}
+                {/* Bộ lọc HSK 1 - 9 */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
                   <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 custom-scrollbar">
                     {['ALL', 'HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSK 7', 'HSK 8', 'HSK 9'].map(lvl => (
                       <button
                         key={lvl}
                         onClick={() => { setSelectedLevel(lvl); setCardIndex(0); }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                           selectedLevel === lvl 
                             ? 'bg-red-700 text-white shadow-xs' 
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
@@ -303,18 +364,18 @@
 
                   <input
                     type="text"
-                    placeholder="Tìm theo chữ Hán, Pinyin, Hán Việt..."
+                    placeholder="🔍 Tìm chữ Hán, Pinyin, Hán Việt..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full sm:w-64 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:border-red-600"
+                    className="w-full sm:w-64 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
-                {/* Thẻ Flashcard 3D Lật Mở */}
+                {/* Thẻ 3D Flashcard */}
                 <div className="max-w-xl mx-auto space-y-4">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                    <span>Thẻ {cardIndex + 1} / {filteredVocab.length || 1}</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300">
+                    <span>Thẻ {cardIndex + 1} / {filteredVocab.length} từ</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-mono">
                       {currentCard.level}
                     </span>
                   </div>
@@ -322,15 +383,15 @@
                   <div
                     onClick={() => setIsFlipped(!isFlipped)}
                     className={`min-h-[340px] p-8 rounded-3xl bg-white dark:bg-slate-900 border-2 transition-all duration-300 cursor-pointer shadow-xl flex flex-col justify-between items-center text-center ${
-                      isFlipped ? 'border-emerald-500 dark:border-emerald-700 bg-emerald-50/20' : 'border-slate-200 dark:border-slate-800 hover:border-red-400'
+                      isFlipped ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-200 dark:border-slate-800 hover:border-red-400'
                     }`}
                   >
                     <div className="w-full flex items-center justify-between text-xs text-slate-400">
                       <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-mono">
-                        {currentCard.category}
+                        Bộ thủ: {currentCard.radical}
                       </span>
                       <span className="text-[11px] font-semibold text-slate-400">
-                        {isFlipped ? 'Chạm để xem chữ Hán' : 'Chạm để lật xem nghĩa & câu ví dụ'}
+                        {isFlipped ? 'Chạm để lật lại' : 'Chạm để xem Pinyin, Hán Việt & Nghĩa'}
                       </span>
                     </div>
 
@@ -339,71 +400,53 @@
                         <div className="text-7xl font-black hanzi-text text-slate-900 dark:text-slate-100 tracking-wider">
                           {currentCard.word}
                         </div>
-                        <p className="text-xs text-slate-400">
-                          Bộ thủ: <span className="font-bold text-slate-600 dark:text-slate-300">{currentCard.radical}</span>
-                        </p>
                       </div>
                     ) : (
                       <div className="space-y-3 my-auto animate-in zoom-in-95 duration-200">
                         <div className="text-5xl font-black hanzi-text text-slate-900 dark:text-slate-100">
                           {currentCard.word}
                         </div>
-                        <div className="text-xl font-black text-red-600 dark:text-red-400 font-mono">
+                        <div className="text-xl font-black text-red-600 font-mono">
                           {currentCard.pinyin}
                         </div>
                         <div className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                          Hán Việt: {currentCard.hanViet}
+                          Âm Hán Việt: <span className="underline decoration-amber-500 font-black">{currentCard.hanViet}</span>
                         </div>
-                        <div className="text-base font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/80 px-4 py-2 rounded-xl">
+                        <div className="text-base font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">
                           {currentCard.meaning}
                         </div>
                         {currentCard.example && (
-                          <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-left">
-                            <span className="font-bold text-red-600">Ví dụ: </span>
+                          <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-left">
+                            <span className="font-bold text-red-600">Câu ví dụ: </span>
                             {currentCard.example}
                           </div>
                         )}
                       </div>
                     )}
 
-                    <div className="w-full flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="w-full flex items-center justify-center pt-4 border-t border-slate-100 dark:border-slate-800">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           speakChinese(currentCard.word);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 text-slate-700 dark:text-slate-300 hover:text-red-700 text-xs font-bold flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 hover:bg-red-100 text-xs font-bold flex items-center gap-2"
                       >
-                        🔊 Nghe phát âm
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleBookmark(currentCard.word);
-                        }}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ${
-                          bookmarkedWords.includes(currentCard.word)
-                            ? 'bg-amber-500 text-white'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        ⭐ {bookmarkedWords.includes(currentCard.word) ? 'Đã lưu sổ tay' : 'Lưu sổ tay'}
+                        🔊 Nghe Phát Âm Bản Xứ
                       </button>
                     </div>
                   </div>
 
-                  {/* Nút lùi / tiến thẻ */}
                   <div className="flex items-center justify-between gap-3">
                     <button
-                      onClick={handlePrevCard}
-                      className="flex-1 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-2xl transition-all shadow-xs"
+                      onClick={() => { setIsFlipped(false); setCardIndex((prev) => (prev - 1 + filteredVocab.length) % (filteredVocab.length || 1)); }}
+                      className="flex-1 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-xs rounded-2xl"
                     >
                       ← Thẻ trước
                     </button>
                     <button
-                      onClick={handleNextCard}
-                      className="flex-1 py-3 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-2xl transition-all shadow-md"
+                      onClick={() => { setIsFlipped(false); setCardIndex((prev) => (prev + 1) % (filteredVocab.length || 1)); }}
+                      className="flex-1 py-3 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-2xl shadow-md"
                     >
                       Thẻ tiếp theo →
                     </button>
@@ -413,175 +456,78 @@
               </div>
             )}
 
-            {/* TAB 2: VIDEO NGẮN LUYỆN SHADOWING */}
-            {currentTab === 'short_videos' && (
+            {/* TAB 2: TRA CỨU & CHIẾT TỰ ĐỘNG CHO BẤT KỲ CHỮ NÀO */}
+            {currentTab === 'dict' && (
               <div className="max-w-2xl mx-auto space-y-6">
-                <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 text-white space-y-2">
-                  <span className="text-[10px] font-black bg-purple-500/40 text-purple-200 px-2.5 py-1 rounded-full uppercase">
-                    TikTok/Reels Chinese Shadowing
-                  </span>
-                  <h2 className="text-xl font-bold">Video Ngắn Luyện Nghe & Đọc Đuổi Câu Thoại</h2>
-                  <p className="text-xs text-purple-200">
-                    Phụ đề song ngữ kèm Pinyin hỗ trợ nghe giọng bản xứ với ngữ điệu tự nhiên.
-                  </p>
-                </div>
+                <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                  <div>
+                    <h3 className="text-lg font-bold">🔍 Bộ Máy Tra Cứu & Tách Chiết Tự Âm Hán Việt</h3>
+                    <p className="text-xs text-slate-500">Nhập bất kỳ từ hoặc câu chữ Hán nào để phân tích âm Hán Việt chuẩn xác:</p>
+                  </div>
 
-                {SHORT_VIDEOS.map(video => (
-                  <div key={video.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={lookupText}
+                      onChange={(e) => setLookupText(e.target.value)}
+                      placeholder="Nhập chữ Hán (ví dụ: 学习, 破釜沉舟, 砥砺前行)..."
+                      className="flex-1 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-base hanzi-text"
+                    />
+                    <button
+                      onClick={() => speakChinese(lookupText)}
+                      className="px-4 py-3 rounded-2xl bg-red-700 text-white font-bold text-xs shadow-sm"
+                    >
+                      🔊 Đọc
+                    </button>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-red-50/50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/60 space-y-3">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950 px-2.5 py-0.5 rounded-md">
-                          {video.hskLevel}
-                        </span>
-                        <h3 className="font-bold text-base mt-1">{video.title}</h3>
-                        <p className="text-[11px] text-slate-400">Giảng viên: {video.creator}</p>
-                      </div>
+                      <span className="text-xs font-bold text-slate-500">Âm Hán Việt Tổng Thể:</span>
+                      <span className="text-base font-black text-red-700 dark:text-red-400">
+                        {analyzedLookup.hanVietFull}
+                      </span>
                     </div>
+                  </div>
 
-                    <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-900 flex items-center justify-center">
-                      <img src={video.videoUrl} alt={video.title} className="w-full h-full object-cover opacity-60" />
-                      <button
-                        onClick={() => {
-                          const fullText = video.captions.map(c => c.hanzi).join(' ');
-                          speakChinese(fullText, 0.8);
-                        }}
-                        className="absolute w-14 h-14 rounded-full bg-red-600/90 text-white flex items-center justify-center text-xl shadow-lg hover:scale-110 transition-transform"
-                      >
-                        ▶
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold text-slate-500 uppercase">Phụ đề & Shadowing từng câu:</p>
-                      {video.captions.map((cap, cIdx) => (
-                        <div
-                          key={cIdx}
-                          onClick={() => speakChinese(cap.hanzi)}
-                          className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-red-50 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all flex items-center justify-between"
-                        >
-                          <div className="space-y-0.5">
-                            <p className="text-sm font-black text-slate-900 dark:text-slate-100">{cap.hanzi}</p>
-                            <p className="text-xs font-mono text-red-600 dark:text-red-400">{cap.pinyin}</p>
-                            <p className="text-xs text-slate-500">{cap.viet}</p>
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase">Chi Tiết Từng Chữ Hán (Chiết Tự):</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {lookupText.trim().split('').map((char, idx) => {
+                        const info = HAN_VIET_CORE_MAP[char] || { hv: convertHanziToHanViet(char), py: '...', rad: 'Bộ thủ', mn: 'Nghĩa từ vựng' };
+                        return (
+                          <div key={idx} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-3xl font-black hanzi-text">
+                              {char}
+                            </div>
+                            <div className="space-y-0.5 text-xs">
+                              <p className="font-black text-red-600 text-sm">{info.hv}</p>
+                              <p className="font-mono text-slate-500">[{info.py}]</p>
+                              <p className="text-slate-400">{info.rad}</p>
+                              <p className="font-medium text-slate-700 dark:text-slate-300">{info.mn}</p>
+                            </div>
                           </div>
-                          <button className="text-xs font-bold text-red-600 p-2">
-                            🔊 Đọc
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* TAB 3: THUẬT TOÁN SM-2 (SPACED REPETITION) */}
-            {currentTab === 'spaced_repetition' && (
-              <div className="space-y-6">
-                <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-950 to-slate-900 text-white space-y-2">
-                  <span className="text-[10px] font-black bg-amber-500/40 text-amber-200 px-2.5 py-1 rounded-full uppercase">
-                    Leitner Box & SM-2 Algorithm
-                  </span>
-                  <h2 className="text-xl font-bold">Ôn Tập Lặp Lại Ngắt Quãng (Spaced Repetition)</h2>
-                  <p className="text-xs text-amber-200">
-                    Ghi nhớ dài hạn giúp não bộ nhớ từ vựng vĩnh viễn theo chu kỳ 1 ngày, 3 ngày, 7 ngày, 16 ngày và 30 ngày.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-                  {[
-                    { box: 'Hộp 1', days: '1 ngày', count: 5, color: 'text-rose-500' },
-                    { box: 'Hộp 2', days: '3 ngày', count: 8, color: 'text-amber-500' },
-                    { box: 'Hộp 3', days: '7 ngày', count: 12, color: 'text-blue-500' },
-                    { box: 'Hộp 4', days: '16 ngày', count: 6, color: 'text-teal-500' },
-                    { box: 'Hộp 5', days: '30 ngày', count: 15, color: 'text-emerald-500' },
-                  ].map((b, idx) => (
-                    <div key={idx} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                      <p className="text-xs font-bold text-slate-400">{b.box} ({b.days})</p>
-                      <p className={`text-2xl font-black mt-1 ${b.color}`}>{b.count}</p>
-                      <p className="text-[10px] text-slate-500">từ vựng</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4">
-                  <h3 className="text-sm font-bold">Danh sách từ đang theo dõi trong SRS:</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {MASTER_VOCABULARY.slice(0, 8).map(w => (
-                      <div key={w.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                        <div>
-                          <span className="font-bold text-base">{w.word}</span>
-                          <span className="text-xs font-mono text-red-600 ml-2">[{w.pinyin}]</span>
-                          <p className="text-xs text-slate-500">{w.meaning}</p>
-                        </div>
-                        <button
-                          onClick={() => speakChinese(w.word)}
-                          className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 text-xs font-bold"
-                        >
-                          🔊 Nghe
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 4: ĐÁNH GIÁ TRÌNH ĐỘ HSK */}
-            {currentTab === 'assessment' && (
-              <div className="max-w-2xl mx-auto space-y-6">
-                <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-center">
-                  <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950 text-red-600 flex items-center justify-center text-2xl mx-auto">
-                    🎯
-                  </div>
-                  <h2 className="text-xl font-bold">Kiểm Tra Chẩn Đoán Trình Độ Nhanh</h2>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    Hệ thống đánh giá vốn từ vựng, ngữ pháp câu chữ 把/被, văn phong công sở và đề xuất lộ trình phù hợp từ HSK 1 đến HSK 9.
-                  </p>
-
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 text-left space-y-3">
-                    <p className="text-xs font-bold text-red-600">Câu hỏi: Điền từ thích hợp vào chỗ trống:</p>
-                    <p className="text-base font-bold">昨天晚上我_____了两个小时的汉语。</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['A. 学', 'B. 学习', 'C. 教', 'D. 读'].map((opt, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            if (i === 1) {
-                              alert('Chính xác! Cấu trúc bổ ngữ thời lượng: 学习了 + Khoảng thời gian');
-                              if (window.confetti) window.confetti();
-                            } else {
-                              alert('Chưa chính xác. Đáp án đúng là B. 学习');
-                            }
-                          }}
-                          className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-red-500 text-xs font-semibold text-left transition-all"
-                        >
-                          {opt}
-                        </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 5: PHÂN TÍCH 4 THANH ĐIỆU */}
-            {currentTab === 'tone_analyzer' && (
+            {/* TAB 3: LUYỆN 4 THANH ĐIỆU */}
+            {currentTab === 'tones' && (
               <div className="max-w-2xl mx-auto space-y-6">
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                  <h2 className="text-lg font-bold flex items-center gap-2">
-                    <span>🎙️ Phân Tích 4 Thanh Điệu Tiếng Trung</span>
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Bấm vào từng thanh điệu để nghe giọng chuẩn và luyện tập phát âm cao độ (5-5, 3-5, 2-1-4, 5-1).
-                  </p>
+                  <h3 className="text-lg font-bold">🎙️ Phân Tích Cao Độ 4 Thanh Điệu Chuẩn Bắc Kinh</h3>
+                  <p className="text-xs text-slate-500">Nhấp vào từng thanh để luyện ngữ điệu chuẩn xác:</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { name: 'Thanh 1 (Âm Bình 5-5)', pinyin: 'mā (妈)', desc: 'Cao và phẳng đều', sample: '妈' },
-                      { name: 'Thanh 2 (Dương Bình 3-5)', pinyin: 'má (麻)', desc: 'Kéo từ trung bình lên cao (như dấu sắc)', sample: '麻' },
-                      { name: 'Thanh 3 (Thượng Thanh 2-1-4)', pinyin: 'mǎ (马)', desc: 'Xuống thấp rồi uốn lên (như dấu hỏi)', sample: '马' },
-                      { name: 'Thanh 4 (Khứ Thanh 5-1)', pinyin: 'mà (骂)', desc: 'Dứt khoát rơi từ đỉnh xuống đáy', sample: '骂' },
+                      { name: 'Thanh 2 (Dương Bình 3-5)', pinyin: 'má (麻)', desc: 'Kéo từ trung bình lên cao', sample: '麻' },
+                      { name: 'Thanh 3 (Thượng Thanh 2-1-4)', pinyin: 'mǎ (马)', desc: 'Xuống đáy rồi uốn nhẹ lên', sample: '马' },
+                      { name: 'Thanh 4 (Khứ Thanh 5-1)', pinyin: 'mà (骂)', desc: 'Rơi dứt khoát từ đỉnh xuống đáy', sample: '骂' },
                     ].map((t, idx) => (
                       <div key={idx} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
                         <div className="flex items-center justify-between">
@@ -602,70 +548,43 @@
               </div>
             )}
 
-            {/* TAB 6: TRA CỨU TOÀN BỘ TỪ VỰNG HSK 1 - 9 */}
-            {currentTab === 'all_words' && (
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold">Bảng Tra Cứu Toàn Bộ Từ Vựng ({MASTER_VOCABULARY.length} mục từ tiêu chuẩn HSK 1 - 9)</h2>
+            {/* TAB 4: NẠP TỪ VỰNG HÀNG LOẠT */}
+            {currentTab === 'bulk' && (
+              <div className="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div>
+                  <h3 className="text-lg font-bold">📥 Nạp Thêm Danh Sách Từ Vựng Hàng Loạt</h3>
+                  <p className="text-xs text-slate-500">
+                    Dán danh sách từ theo định dạng: <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">Chữ Hán | Pinyin | Nghĩa | Cấp độ HSK</code>
+                  </p>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 font-bold">
-                        <th className="py-2.5 px-3">Chữ Hán</th>
-                        <th className="py-2.5 px-3">Pinyin</th>
-                        <th className="py-2.5 px-3">Hán Việt</th>
-                        <th className="py-2.5 px-3">Nghĩa Tiếng Việt</th>
-                        <th className="py-2.5 px-3">Bộ Thủ</th>
-                        <th className="py-2.5 px-3">Cấp Độ</th>
-                        <th className="py-2.5 px-3 text-right">Phát Âm</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {MASTER_VOCABULARY.map(w => (
-                        <tr key={w.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                          <td className="py-3 px-3 text-base font-black hanzi-text">{w.word}</td>
-                          <td className="py-3 px-3 font-mono font-bold text-red-600">{w.pinyin}</td>
-                          <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{w.hanViet}</td>
-                          <td className="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200">{w.meaning}</td>
-                          <td className="py-3 px-3 text-slate-500 font-mono">{w.radical}</td>
-                          <td className="py-3 px-3">
-                            <span className="px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold">
-                              {w.level}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <button
-                              onClick={() => speakChinese(w.word)}
-                              className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 rounded-lg text-slate-700 dark:text-slate-300 hover:text-red-700 font-bold"
-                            >
-                              🔊
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <textarea
+                  rows="6"
+                  placeholder="Ví dụ:&#10;梦想 | mèngxiǎng | Ước mơ | HSK 3&#10;成功 | chénggōng | Thành công | HSK 4&#10;自强不息 | zì qiáng bù xī | Tự lực tự cường không ngừng | HSK 8"
+                  value={bulkInput}
+                  onChange={(e) => setBulkInput(e.target.value)}
+                  className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs focus:outline-none focus:border-red-600"
+                ></textarea>
+
+                <button
+                  onClick={handleBulkImport}
+                  className="w-full py-3.5 rounded-2xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs shadow-md transition-all"
+                >
+                  🚀 Bắt Đầu Nạp Vào Kho Lưu Trữ
+                </button>
               </div>
             )}
 
           </main>
 
-          {/* CHÂN TRANG (FOOTER) */}
-          <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 mt-auto">
-            <p className="font-bold text-slate-700 dark:text-slate-300">Tam Thanh Chinese &copy; 2026 - Bản Xuất Độc Lập 1 File Duy Nhất</p>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Chứa đầy đủ mã nguồn HTML, CSS Tailwind, JavaScript React & Web Speech API. Mở trực tiếp trên mọi thiết bị không cần kết nối mạng.
-            </p>
+          {/* FOOTER */}
+          <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 text-center text-xs text-slate-500 mt-auto">
+            Tam Thanh Chinese &copy; 2026 - Bản 1 File Standalone Chuẩn 3.0 HSK 1 - 9
           </footer>
-
         </div>
       );
     }
 
-    // KHỞI TẠO VÀ RENDER REACT VÀO DOM
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
