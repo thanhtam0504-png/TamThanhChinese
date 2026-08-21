@@ -8,11 +8,20 @@
   { "id": "7", "word": "八", "pinyin": "bā", "hanViet": "Bát", "meaning": "Số 8", "level": "HSK 1", "isVip": false },
   { "id": "8", "word": "爸爸", "pinyin": "bàba", "hanViet": "Ba Ba", "meaning": "Bố", "level": "HSK 1", "isVip": false },
   { "id": "9", "word": "杯子", "pinyin": "<b>b</b>ēi zi", "hanViet": "Bôi Tử", "meaning": "Cái cốc", "level": "HSK 1", "isVip": false },
-  { "id": "10", "word": "北京", "pinyin": "<b>b</b>ěi jīng", "hanViet": "Bắc Kinh", "meaning": "Bắc Kinh", "level": "HSK 1", "isVip": false }
-  ,
+  { "id": "10", "word": "北京", "pinyin": "<b>b</b>ěi jīng", "hanViet": "Bắc Kinh", "meaning": "Bắc Kinh", "level": "HSK 1", "isVip": false },
   { "id": "11", "word": "本", "pinyin": "<b>b</b>ěn", "hanViet": "Bản", "meaning": "Quyển, tập", "level": "HSK 1", "isVip": false },
   { "id": "12", "word": "不", "pinyin": "<b>b</b>ù", "hanViet": "Bất", "meaning": "Không", "level": "HSK 1", "isVip": false },
   { "id": "13", "word": "菜", "pinyin": "<b>c</b>ài", "hanViet": "Thái", "meaning": "Rau, món ăn", "level": "HSK 1", "isVip": false },
   { "id": "14", "word": "茶", "pinyin": "<b>ch</b>á", "hanViet": "Trà", "meaning": "Trà", "level": "HSK 1", "isVip": false },
-  { "id": "15", "word": "吃", "pinyin": "<b>ch</b>ī", "hanViet": "Cật", "meaning": "Ăn", "level": "HSK 1", "isVip": false }
+  { "id": "15", "word": "吃", "pinyin": "<b>ch</b>ī", "hanViet": "Cật", "meaning": "Ăn", "level": "HSK 1", "isVip": false },
+  { "id": "16", "word": "出租车", "pinyin": "<b>ch</b>ū zū <b>ch</b>ē", "hanViet": "Xuất Tô Xa", "meaning": "Xe taxi", "level": "HSK 1", "isVip": false },
+  { "id": "17", "word": "打电话", "pinyin": "dǎ diàn huà", "hanViet": "Đả Điển Thoại", "meaning": "Gọi điện thoại", "level": "HSK 1", "isVip": false },
+  { "id": "18", "word": "大", "pinyin": "dà", "hanViet": "Đại", "meaning": "To, lớn", "level": "HSK 1", "isVip": false },
+  { "id": "19", "word": "的", "pinyin": "de", "hanViet": "Đích", "meaning": "Của", "level": "HSK 1", "isVip": false },
+  { "id": "20", "word": "点", "pinyin": "diǎn", "hanViet": "Điểm", "meaning": "Giờ, điểm", "level": "HSK 1", "isVip": false },
+  { "id": "21", "word": "电脑", "pinyin": "diàn nǎo", "hanViet": "Điện Não", "meaning": "Máy vi tính", "level": "HSK 1", "isVip": false },
+  { "id": "22", "word": "电视", "pinyin": "diàn shì", "hanViet": "Điện Thị", "meaning": "Ti vi", "level": "HSK 1", "isVip": false },
+  { "id": "23", "word": "电影", "pinyin": "diàn yǐng", "hanViet": "Điện Ảnh", "meaning": "Phim", "level": "HSK 1", "isVip": false },
+  { "id": "24", "word": "东西", "pinyin": "dōng xi", "hanViet": "Đông Tây", "meaning": "Đồ đạc", "level": "HSK 1", "isVip": false },
+  { "id": "25", "word": "都", "pinyin": "dōu", "hanViet": "Đô", "meaning": "Đều", "level": "HSK 1", "isVip": false }
 ]
