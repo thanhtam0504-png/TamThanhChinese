@@ -3,174 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tam Thanh Chinese - Hệ Thống Luyện Thi HSK</title>
+  <title>Tam Thanh Chinese</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans">
+<body class="bg-slate-100 min-h-screen">
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
-
-    // Dữ liệu từ vựng nhúng thẳng trực tiếp vào đây để không bị lỗi file json
-    const allVocabData = {
-      'HSK 1': [
-        { "id": "1", "word": "我", "pinyin": "wǒ", "hanViet": "Ngã", "meaning": "Tôi", "level": "HSK 1" },
-        { "id": "2", "word": "你", "pinyin": "nǐ", "hanViet": "Nhĩ", "meaning": "Bạn", "level": "HSK 1" },
-        { "id": "3", "word": "他", "pinyin": "<b>t</b>ā", "hanViet": "Tha", "meaning": "Anh ấy", "level": "HSK 1" },
-        { "id": "4", "word": "她", "pinyin": "<b>t</b>ā", "hanViet": "Tha", "meaning": "Cô ấy", "level": "HSK 1" },
-        { "id": "5", "word": "我们", "pinyin": "wǒmen", "hanViet": "Ngã Môn", "meaning": "Chúng tôi", "level": "HSK 1" },
-        { "id": "6", "word": "爱", "pinyin": "ài", "hanViet": "Ái", "meaning": "Yêu", "level": "HSK 1" },
-        { "id": "7", "word": "八", "pinyin": "bā", "hanViet": "Bát", "meaning": "Số 8", "level": "HSK 1" },
-        { "id": "8", "word": "爸爸", "pinyin": "bàba", "hanViet": "Ba Ba", "meaning": "Bố", "level": "HSK 1" },
-        { "id": "9", "word": "杯子", "pinyin": "<b>b</b>ēi zi", "hanViet": "Bôi Tử", "meaning": "Cái cốc", "level": "HSK 1" },
-        { "id": "10", "word": "北京", "pinyin": "<b>b</b>ěi jīng", "hanViet": "Bắc Kinh", "meaning": "Bắc Kinh", "level": "HSK 1" },
-        { "id": "11", "word": "本", "pinyin": "<b>b</b>ěn", "hanViet": "Bản", "meaning": "Quyển, tập", "level": "HSK 1" },
-        { "id": "12", "word": "不", "pinyin": "<b>b</b>ù", "hanViet": "Bất", "meaning": "Không", "level": "HSK 1" },
-        { "id": "13", "word": "菜", "pinyin": "<b>c</b>ài", "hanViet": "Thái", "meaning": "Rau, món ăn", "level": "HSK 1" },
-        { "id": "14", "word": "茶", "pinyin": "<b>ch</b>á", "hanViet": "Trà", "meaning": "Trà", "level": "HSK 1" },
-        { "id": "15", "word": "吃", "pinyin": "<b>ch</b>ī", "hanViet": "Cật", "meaning": "Ăn", "level": "HSK 1" },
-        { "id": "16", "word": "出租车", "pinyin": "<b>ch</b>ū zū <b>ch</b>ē", "hanViet": "Xuất Tô Xa", "meaning": "Xe taxi", "level": "HSK 1" },
-        { "id": "17", "word": "打电话", "pinyin": "dǎ diàn huà", "hanViet": "Đả Điển Thoại", "meaning": "Gọi điện thoại", "level": "HSK 1" },
-        { "id": "18", "word": "大", "pinyin": "dà", "hanViet": "Đại", "meaning": "To, lớn", "level": "HSK 1" },
-        { "id": "19", "word": "的", "pinyin": "de", "hanViet": "Đích", "meaning": "Của", "level": "HSK 1" },
-        { "id": "20", "word": "点", "pinyin": "diǎn", "hanViet": "Điểm", "meaning": "Giờ, điểm", "level": "HSK 1" },
-        { "id": "21", "word": "电脑", "pinyin": "diàn nǎo", "hanViet": "Điện Não", "meaning": "Máy vi tính", "level": "HSK 1" },
-        { "id": "22", "word": "电视", "pinyin": "diàn shì", "hanViet": "Điện Thị", "meaning": "Ti vi", "level": "HSK 1" },
-        { "id": "23", "word": "电影", "pinyin": "diàn yǐng", "hanViet": "Điện Ảnh", "meaning": "Phim", "level": "HSK 1" },
-        { "id": "24", "word": "东西", "pinyin": "dōng xi", "hanViet": "Đông Tây", "meaning": "Đồ đạc", "level": "HSK 1" },
-        { "id": "25", "word": "都", "pinyin": "dōu", "hanViet": "Đô", "meaning": "Đều", "level": "HSK 1" }
-      ],
-      'HSK 2': [
-        { "id": "1", "word": "吧", "pinyin": "ba", "hanViet": "Ba", "meaning": "Nhé, đi (trợ từ)", "level": "HSK 2" },
-        { "id": "2", "word": "ài", "word": "出", "pinyin": "<b>ch</b>ū", "hanViet": "Xuất", "meaning": "Ra", "level": "HSK 2" }
-      ]
-    };
+    const vocabList = [
+      { id: "1", word: "我", pinyin: "wǒ", hanViet: "Ngã", meaning: "Tôi", level: "HSK 1" },
+      { id: "2", word: "你", pinyin: "nǐ", hanViet: "Nhĩ", meaning: "Bạn", level: "HSK 1" },
+      { id: "3", word: "他", pinyin: "<b>t</b>ā", hanViet: "Tha", meaning: "Anh ấy", level: "HSK 1" },
+      { id: "4", word: "她", pinyin: "<b>t</b>ā", "hanViet": "Tha", meaning: "Cô ấy", level: "HSK 1" },
+      { id: "5", word: "我们", pinyin: "wǒmen", hanViet: "Ngã Môn", meaning: "Chúng tôi", level: "HSK 1" },
+      { id: "6", word: "爱", pinyin: "ài", hanViet: "Ái", meaning: "Yêu", level: "HSK 1" },
+      { id: "7", word: "八", pinyin: "bā", hanViet: "Bát", meaning: "Số 8", level: "HSK 1" },
+      { id: "8", word: "爸爸", pinyin: "bàba", "hanViet": "Ba Ba", "meaning": "Bố", level: "HSK 1" },
+      { id: "9", word: "杯子", pinyin: "<b>b</b>ēi zi", hanViet: "Bôi Tử", meaning: "Cái cốc", level: "HSK 1" },
+      { id: "10", word: "北京", "pinyin": "<b>b</b>ěi jīng", "hanViet": "Bắc Kinh", "meaning": "Bắc Kinh", level: "HSK 1" },
+      { id: "11", word: "本", "pinyin": "<b>b</b>ěn", "hanViet": "Bản", "meaning": "Quyển, tập", "level": "HSK 1" },
+      { id: "12", word: "不", "pinyin": "<b>b</b>ù", "hanViet": "Bất", "meaning": "Không", "level": "HSK 1" },
+      { id: "13", word: "菜", "pinyin": "<b>c</b>ài", "hanViet": "Thái", "meaning": "Rau, món ăn", "level": "HSK 1" },
+      { id: "14", word: "茶", "pinyin": "<b>ch</b>á", "hanViet": "Trà", "meaning": "Trà", "level": "HSK 1" },
+      { id: "15", word: "吃", "pinyin": "<b>ch</b>ī", "hanViet": "Cật", "meaning": "Ăn", "level": "HSK 1" },
+      { id: "16", word: "出租车", "pinyin": "<b>ch</b>ū zū <b>ch</b>ē", hanViet: "Xuất Tô Xa", meaning: "Xe taxi", level: "HSK 1" },
+      { id: "17", "word": "打电话", "pinyin": "dǎ diàn huà", hanViet": "Đả Điển Thoại", meaning: "Gọi điện thoại", level: "HSK 1" },
+      { id: "18", "word": "大", "pinyin": "dà", hanViet": "Đại", meaning: "To, lớn", "level": "HSK 1" },
+      { id: "19", "word": "的", "pinyin": "de", hanViet": "Đích", meaning: "Của", level: "HSK 1" },
+      { id: "20", "word": "点", "pinyin": "diǎn", hanViet": "Điểm", meaning: "Giờ, điểm", "level": "HSK 1" },
+      { id: "21", "word": "电脑", "pinyin": "diàn nǎo", "hanViet": "Điện Não", meaning: "Máy vi tính", "level": "HSK 1" },
+      { id: "22", "word": "电视", "pinyin": "diàn shì", "hanViet": "Điện Thị", meaning: "Ti vi", "level": "HSK 1" },
+      { id: "23", "word": "电影", "pinyin": "diàn yǐng", "hanViet": "Điện Ảnh", meaning: "Phim", "level": "HSK 1" },
+      { id: "24", "word": "东西", "pinyin": "dōng xi", "hanViet": "Đông Tây", meaning: "Đồ đạc", "level": "HSK 1" },
+      { id: "25", "word": "都", "pinyin": "dōu", "hanViet": "Đô", meaning: "Đều", "level": "HSK 1" }
+    ];
 
     function App() {
-      const [currentLevel, setCurrentLevel] = useState('HSK 1');
-      const [activeTab, setActiveTab] = useState('vocab');
-      const [currentIndex, setCurrentIndex] = useState(0);
-      const [showAnswer, setShowAnswer] = useState(false);
-
-      const vocabData = allVocabData[currentLevel] || [];
-
-      const handleLevelChange = (lvl) => {
-        setCurrentLevel(lvl);
-        setCurrentIndex(0);
-        setShowAnswer(false);
-      };
-
       return (
-        <div className="max-w-xl mx-auto p-4 pb-12">
-          <div className="bg-amber-500 text-white p-4 rounded-2xl shadow-md mb-4 text-center">
-            <h1 className="text-xl font-bold">TAM THANH CHINESE</h1>
-            <p className="text-xs opacity-90">Hệ thống học từ vựng và luyện tập HSK chuẩn</p>
+        <div className="max-w-md mx-auto p-4">
+          <div className="bg-amber-500 text-white p-4 rounded-xl text-center font-bold mb-4">
+            TAM THANH CHINESE ({vocabList.length} từ)
           </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
-            {['HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSK 7-9'].map(lvl => (
-              <button 
-                key={lvl}
-                onClick={() => handleLevelChange(lvl)}
-                className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm ${currentLevel === lvl ? 'bg-red-600 text-white scale-105' : 'bg-white text-slate-700 border hover:bg-slate-50'}`}
-              >
-                {lvl}
-              </button>
+          <div className="space-y-3">
+            {vocabList.map(item => (
+              <div key={item.id} className="bg-white p-4 rounded-xl shadow flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">{item.word}</h2>
+                  <p className="text-red-600 font-medium" dangerouslySetInnerHTML={{ __html: item.pinyin }}></p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{item.meaning}</p>
+                  <p className="text-xs text-slate-400 italic">({item.hanViet})</p>
+                </div>
+              </div>
             ))}
           </div>
-
-          <div className="flex bg-slate-200 p-1 rounded-xl mb-4">
-            <button 
-              onClick={() => setActiveTab('vocab')}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'vocab' ? 'bg-white text-slate-800 shadow' : 'text-slate-600'}`}
-            >
-              📖 Danh sách từ vựng ({vocabData.length})
-            </button>
-            <button 
-              onClick={() => setActiveTab('practice')}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'practice' ? 'bg-white text-slate-800 shadow' : 'text-slate-600'}`}
-            >
-              ⚡ Luyện tập Flashcard
-            </button>
-          </div>
-
-          {vocabData.length === 0 ? (
-            <div className="bg-white p-6 rounded-2xl text-center shadow-sm text-slate-500">
-              Cấp độ này đang được cập nhật thêm từ vựng!
-            </div>
-          ) : (
-            <div>
-              {activeTab === 'vocab' && (
-                <div className="grid gap-3">
-                  {vocabData.map(item => (
-                    <div key={item.id} className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
-                      <div>
-                        <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-md">{item.level}</span>
-                        <h2 className="text-3xl font-bold text-slate-800 my-1">{item.word}</h2>
-                        <p className="text-red-600 font-medium text-sm" dangerouslySetInnerHTML={{ __html: item.pinyin }}></p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-slate-800 font-bold text-lg">{item.meaning}</p>
-                        <p className="text-xs text-slate-400 italic">({item.hanViet})</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'practice' && (
-                <div className="bg-white p-6 rounded-3xl shadow-md text-center">
-                  <div className="flex justify-between items-center mb-6 text-xs text-slate-400 font-bold">
-                    <span>Cấp độ: {currentLevel}</span>
-                    <span>Từ {currentIndex + 1} / {vocabData.length}</span>
-                  </div>
-
-                  <div 
-                    onClick={() => setShowAnswer(!showAnswer)}
-                    className="min-h-[220px] bg-gradient-to-br from-slate-50 to-amber-50/30 border-2 border-dashed border-amber-200 rounded-2xl p-6 flex flex-col justify-center items-center cursor-pointer shadow-inner transition-all hover:border-amber-400"
-                  >
-                    <h2 className="text-6xl font-bold text-slate-900 mb-3">{vocabData[currentIndex].word}</h2>
-                    
-                    {!showAnswer ? (
-                      <p className="text-xs text-amber-600 font-semibold bg-amber-100/60 px-3 py-1 rounded-full">Bấm vào đây để xem Pinyin và nghĩa</p>
-                    ) : (
-                      <div className="animate-fade-in mt-2 space-y-1">
-                        <p className="text-red-600 font-bold text-lg" dangerouslySetInnerHTML={{ __html: vocabData[currentIndex].pinyin }}></p>
-                        <p className="text-slate-800 font-bold text-xl">{vocabData[currentIndex].meaning}</p>
-                        <p className="text-sm text-slate-500 italic">Hán Việt: {vocabData[currentIndex].hanViet}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between gap-3 mt-6">
-                    <button 
-                      disabled={currentIndex === 0}
-                      onClick={() => { setCurrentIndex(currentIndex - 1); setShowAnswer(false); }}
-                      className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold rounded-xl text-sm"
-                    >
-                      ⬅️ Từ trước
-                    </button>
-                    <button 
-                      disabled={currentIndex === vocabData.length - 1}
-                      onClick={() => { setCurrentIndex(currentIndex + 1); setShowAnswer(false); }}
-                      className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-bold rounded-xl text-sm shadow-md"
-                    >
-                      Từ tiếp theo ➡️
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       );
     }
 
-    ReactDOM.createRoot(default = document.getElementById('root')).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
