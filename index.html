@@ -994,26 +994,3 @@
   </script>
 </body>
 </html>
-// 1. Khi mở web, tải danh sách bài đọc đã lưu trước đó (nếu có), nếu chưa có thì dùng danh sách mặc định
-const [articles, setArticles] = useState(() => {
-  const savedArticles = localStorage.getItem('tam_thanh_saved_articles');
-  if (savedArticles) {
-    try {
-      return JSON.parse(savedArticles);
-    } catch (e) {
-      console.error("Lỗi đọc dữ liệu lưu:", e);
-    }
-  }
-  return [
-    // Danh sách bài mặc định ban đầu của bạn ở đây
-  ];
-});
-
-// 2. Mỗi khi bạn bấm tạo bài mới, gọi hàm này để thêm bài và TỰ ĐỘNG LƯU lại
-const handleAddNewArticle = (newArticle) => {
-  const updatedArticles = [newArticle, ...articles]; // Thêm bài mới lên đầu danh sách
-  setArticles(updatedArticles);
-  
-  // Lưu vào bộ nhớ trình duyệt vĩnh viễn (cho đến khi bạn xóa lịch sử web)
-  localStorage.setItem('tam_thanh_saved_articles', JSON.stringify(updatedArticles));
-};
