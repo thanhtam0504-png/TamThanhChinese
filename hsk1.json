@@ -9,4 +9,10 @@
   { "id": "8", "word": "爸爸", "pinyin": "bàba", "hanViet": "Ba Ba", "meaning": "Bố", "level": "HSK 1", "isVip": false },
   { "id": "9", "word": "杯子", "pinyin": "<b>b</b>ēi zi", "hanViet": "Bôi Tử", "meaning": "Cái cốc", "level": "HSK 1", "isVip": false },
   { "id": "10", "word": "北京", "pinyin": "<b>b</b>ěi jīng", "hanViet": "Bắc Kinh", "meaning": "Bắc Kinh", "level": "HSK 1", "isVip": false }
+  ,
+  { "id": "11", "word": "本", "pinyin": "<b>b</b>ěn", "hanViet": "Bản", "meaning": "Quyển, tập", "level": "HSK 1", "isVip": false },
+  { "id": "12", "word": "不", "pinyin": "<b>b</b>ù", "hanViet": "Bất", "meaning": "Không", "level": "HSK 1", "isVip": false },
+  { "id": "13", "word": "菜", "pinyin": "<b>c</b>ài", "hanViet": "Thái", "meaning": "Rau, món ăn", "level": "HSK 1", "isVip": false },
+  { "id": "14", "word": "茶", "pinyin": "<b>ch</b>á", "hanViet": "Trà", "meaning": "Trà", "level": "HSK 1", "isVip": false },
+  { "id": "15", "word": "吃", "pinyin": "<b>ch</b>ī", "hanViet": "Cật", "meaning": "Ăn", "level": "HSK 1", "isVip": false }
 ]
