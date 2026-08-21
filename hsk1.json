@@ -1,0 +1,12 @@
+[
+  { "id": "1", "word": "我", "pinyin": "wǒ", "hanViet": "Ngã", "meaning": "Tôi", "level": "HSK 1", "isVip": false },
+  { "id": "2", "word": "你", "pinyin": "nǐ", "hanViet": "Nhĩ", "meaning": "Bạn", "level": "HSK 1", "isVip": false },
+  { "id": "3", "word": "他", "pinyin": "<b>t</b>ā", "hanViet": "Tha", "meaning": "Anh ấy", "level": "HSK 1", "isVip": false },
+  { "id": "4", "word": "她", "pinyin": "<b>t</b>ā", "hanViet": "Tha", "meaning": "Cô ấy", "level": "HSK 1", "isVip": false },
+  { "id": "5", "word": "我们", "pinyin": "wǒmen", "hanViet": "Ngã Môn", "meaning": "Chúng tôi", "level": "HSK 1", "isVip": false },
+  { "id": "6", "word": "爱", "pinyin": "ài", "hanViet": "Ái", "meaning": "Yêu", "level": "HSK 1", "isVip": false },
+  { "id": "7", "word": "八", "pinyin": "bā", "hanViet": "Bát", "meaning": "Số 8", "level": "HSK 1", "isVip": false },
+  { "id": "8", "word": "爸爸", "pinyin": "bàba", "hanViet": "Ba Ba", "meaning": "Bố", "level": "HSK 1", "isVip": false },
+  { "id": "9", "word": "杯子", "pinyin": "<b>b</b>ēi zi", "hanViet": "Bôi Tử", "meaning": "Cái cốc", "level": "HSK 1", "isVip": false },
+  { "id": "10", "word": "北京", "pinyin": "<b>b</b>ěi jīng", "hanViet": "Bắc Kinh", "meaning": "Bắc Kinh", "level": "HSK 1", "isVip": false }
+]
